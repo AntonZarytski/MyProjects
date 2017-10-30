@@ -1,22 +1,33 @@
 package Server;
 
-import java.util.HashMap;
+import java.sql.SQLException;
 
-public class BaseAuthService {
-    private class Entry{
+public class BaseAuthService implements AuthService{
+    private class Entry {
         private String login;
-        private String password;
+        private String pass;
         private String nick;
-        public Entry (String login, String password, String nick){
+        public Entry(String login, String pass, String nick) {
             this.login = login;
-            this.password = password;
+            this.pass = pass;
             this.nick = nick;
         }
     }
-    private static HashMap<String, Entry> entries;
-
-    public BaseAuthService (){
-        entries = new HashMap <> (  );
-
+    @Override
+    public void start() {
+        try {
+            DB.connect();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
     }
+    @Override
+    public void stop() {
+        try {
+            DB.disconect();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

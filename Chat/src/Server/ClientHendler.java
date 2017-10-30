@@ -3,18 +3,21 @@ package Server;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 
 public class ClientHendler {
-    Socket client;
-    MyServer server;
-    DataInputStream in;
-    DataOutputStream out;
-    public ClientHendler(MyServer server, Socket client){
-        this.client = client;
-        this.server = server;
+    private Socket client;
+    private DataInputStream in;
+    private DataOutputStream out;
+    private String name;
+    private boolean isOnline;
+    public ClientHendler(Socket client){
+        isOnline=false;
+        long a = System.currentTimeMillis ();
         try {
+            this.client = client;
+            name = "";
             in = new DataInputStream ( client.getInputStream () );
             out = new DataOutputStream ( client.getOutputStream () );
         } catch (IOException e) {
@@ -22,25 +25,71 @@ public class ClientHendler {
         }
         new Thread (()-> {
                try {
-                   String inMsg;
+                   sendMsg ( "У вас есть 120 секунд для авторизации" );
                    while (true) {
-                       inMsg = in.readUTF ();
-                       String elements[] = inMsg.split ( " " );
-                       System.out.println (elements[0] + elements[1]+elements[2]+elements[3]);
-                       if(elements[0].equals("/auth")) {
-                           if (elements[ 1 ].equals ( "login" ) && elements[ 2 ].equals ( "pass" )){
-                               System.out.println ("авторизация ок");
-                               sendMsg ( "/authisok" );
-                           break;
-                           }else sendMsg ( "Не верный логин/пароль" );
+                       new Thread (()-> {
+                           while(true) {
+                               long b = System.currentTimeMillis () - a;
+                               if (b >= 120000&& !isOnline) {
+                                   sendMsg ("Время на авторизациб истекло");
+                                   MyServer.unsubscribeMe ( this );
+                                   try {
+                                       client.close ();
+                                       break;
+                                   } catch (IOException e) {
+                                       e.printStackTrace ();
+                                       break;
+                                   }
+                               }else if (b>120000) break;
+                           }
+                       }).start ();
+                       String inMsg = in.readUTF();
+                       if (inMsg.startsWith("/auth")) {
+                           String elements[] = inMsg.split(" ");
+                           if (DB.chekLoginPass(elements[1], elements[2])) {
+                               String nick = DB.getNickbyLoginPassword(elements[1], elements[2]);
+                               if (nick != null) {
+                                   if (!MyServer.isNickBusy(nick)) {
+                                       sendMsg("/authisok");
+                                       this.name = nick;
+                                       MyServer.sendMsgForAll(this.name + " зашел в чат");
+                                       MyServer.broadcastUsersList();
+                                       isOnline = true;
+                                       MyServer.broadcastCountofUsers();
+                                       break;
+                                   } else sendMsg("Учетная запись используется");
+                               } else sendMsg("Необходимо ввести имя");
+                           } else sendMsg("Не верные логин/пароль");
+                       }
+                       if(inMsg.startsWith("/new")){
+                           String elements[] = inMsg.split(" ");
+
+
                        }
                    }
-                   while (true){
-                       inMsg = in.readUTF ();
-                       MyServer.sendMsgForAll ( inMsg );
+                   while (true) {
+                       String inMsg = in.readUTF ();
+                       if (inMsg.equalsIgnoreCase ( "/end" )) break;
+                       if (inMsg.startsWith ( "/w" )) {
+                           String[] elements = inMsg.split ( " ", 3 );
+                           String nameTo = elements[ 1 ];
+                           String message = elements[ 2 ];
+                           MyServer.sendMsgTo ( this, nameTo, message );
+                       } else {
+                           MyServer.sendMsgForAll ( this.name + ": " + inMsg );
+                       }
                    }
                } catch (IOException e) {
                    e.printStackTrace ();
+               } catch (SQLException e) {
+                   e.printStackTrace();
+               } finally {
+                   MyServer.unsubscribeMe(this);
+                   try {
+                       client.close();
+                   } catch (IOException e) {
+                       e.printStackTrace();
+                   }
                }
 
         } ).start ();
@@ -53,4 +102,8 @@ public class ClientHendler {
             e.printStackTrace ();
         }
     }
+    public String getName() {
+        return name;
+    }
 }
+

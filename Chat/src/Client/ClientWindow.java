@@ -2,10 +2,7 @@ package Client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -27,7 +24,13 @@ public class ClientWindow extends JFrame {
     private JTextArea clientListArea;
     private JTextArea countOfClientsField;
     private JTextArea msgHistoryArea;
+    private JPanel startWindow;
+    private JButton logIn;
+    private JButton newUser;
+    private JButton back;
     private boolean isAuthorised;
+    private boolean isNewUser;
+    private JLayeredPane layer;
 
     public void setAuthorised(boolean authorised) {
         isAuthorised = authorised;
@@ -48,23 +51,34 @@ public class ClientWindow extends JFrame {
         setBounds ( 300,300,640,640 );
         setLayout ( new BorderLayout (  ) );
         setDefaultCloseOperation ( WindowConstants.EXIT_ON_CLOSE );
-        authPanel = new JPanel ( new GridLayout ( 1,4 ) );
+        layer = new JLayeredPane();
+        authPanel = new JPanel ( new GridLayout ( 2,4 ) );
+        authPanel.setVisible(false);
         loginField = new JTextField ( "Логин" );
         passwordField = new JPasswordField ( "Пароль" );
         nickNameField = new JTextField ( "Имя" );
         sendAuthButton = new JButton ( "Войти в чат" );
+        back = new JButton("Назад");
         authPanel.add(loginField);
         authPanel.add(passwordField);
         authPanel.add(nickNameField);
         authPanel.add(sendAuthButton);
+        authPanel.add(back);
         add(authPanel, BorderLayout.NORTH);
         sendAuthButton.addActionListener ( new ActionListener () {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sendMsg ("/auth" + " " + loginField.getText () + " " + passwordField.getText () + " " + nickNameField.getText ());
-                loginField.setText ( "" );
-                passwordField.setText ( "" );
-                nickNameField.setText ( "" );
+                if(!isNewUser) {
+                    sendMsg("/auth" + " " + loginField.getText() + " " + passwordField.getText() + " " + nickNameField.getText());
+                    loginField.setText("");
+                    passwordField.setText("");
+                    nickNameField.setText("");
+                }else {
+                    sendMsg("/new" + " " + loginField.getText() + " " + passwordField.getText() + " " + nickNameField.getText());
+                    loginField.setText("");
+                    passwordField.setText("");
+                    nickNameField.setText("");
+                }
             }
         } );
         loginField.addFocusListener ( new FocusListener () {
@@ -73,7 +87,6 @@ public class ClientWindow extends JFrame {
                 if (loginField.getText ().equals ( "Логин" ))
                     loginField.setText ( "" );
             }
-
             @Override
             public void focusLost(FocusEvent e) {
                 if (loginField.getText ().isEmpty ())
@@ -86,7 +99,6 @@ public class ClientWindow extends JFrame {
                 if (passwordField.getText ().equals ( "Пароль" ))
                     passwordField.setText ( "" );
             }
-
             @Override
             public void focusLost(FocusEvent e) {
                 if (passwordField.getText ().isEmpty ())
@@ -125,7 +137,6 @@ public class ClientWindow extends JFrame {
                 if (msgField.getText ().equals ("Отправить сообщение"))
                     msgField.setText ( "" );
             }
-
             @Override
             public void focusLost(FocusEvent e) {
                 if (msgField.getText ().isEmpty ())
@@ -140,13 +151,14 @@ public class ClientWindow extends JFrame {
             }
         } );
 
-        clientListPanel = new JPanel ( new GridLayout ( 2,1 ));
+        clientListPanel = new JPanel ( new BorderLayout());
         countOfClientsField = new JTextArea ( "Онлайн: " );
         countOfClientsField.setEditable ( false );
         clientListArea = new JTextArea (  );
         clientListArea.setEditable ( false );
-        clientListPanel.add(countOfClientsField);
-        clientListPanel.add(clientListArea);
+        clientListArea.setPreferredSize ( new Dimension ( 150,1 ) );
+        clientListPanel.add(countOfClientsField, BorderLayout.NORTH);
+        clientListPanel.add(clientListArea,BorderLayout.CENTER);
         countOfClientsField.setBackground ( new Color ( 203, 255, 244 ));
         clientListArea.setBackground ( new Color ( 203, 255, 244 ));
         add(clientListPanel, BorderLayout.EAST);
@@ -155,28 +167,117 @@ public class ClientWindow extends JFrame {
         msgHistoryArea.setEditable ( false );
         add(msgHistoryArea, BorderLayout.CENTER);
         setAuthorised ( false );
+
+        startWindow = new JPanel(new GridLayout(1,2));
+        logIn = new JButton("Зарегистрированный пользователь");
+        newUser = new JButton("Новый пользователь");
+        startWindow.add(logIn);
+        startWindow.add(newUser);
+        startWindow.setVisible(true);
+        add(startWindow, BorderLayout.NORTH);
+
+        logIn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                isNewUser=false;
+                startWindow.setVisible(false);
+                authPanel.setVisible(true);
+            }
+        });
+        newUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                isNewUser=false;
+                startWindow.setVisible(false);
+                authPanel.setVisible(true);
+            }
+        });
+        layer = new JLayeredPane();
+        layer.add(startWindow, new Integer(1));
+        layer.add(authPanel, new Integer(0));
+        layer.setBounds(0,0 ,720, 100);
+        add(layer);
+        layer.setVisible(true);
+
         new Thread (()->{
                 try {
-                    String inMsg;
                     while (true){
-                        inMsg = in.readUTF ();
-                        System.out.println (inMsg);
+                        String inMsg = in.readUTF ();
                         if(inMsg.equals ( "/authisok" )){
+                            msgHistoryArea.setText("");
                             setAuthorised ( true );
                             break;
+                        }else if (!inMsg.startsWith ( "/userslist" )){
+                            msgHistoryArea.append ( inMsg + "\n" );
+                            msgHistoryArea.setCaretPosition (clientListArea.getDocument ().getLength () );
+                        }else if (!inMsg.startsWith("/count")){
+                            msgHistoryArea.append ( inMsg + "\n" );
+                            msgHistoryArea.setCaretPosition (clientListArea.getDocument ().getLength () );
                         }
                     }
                     while(true) {
-                        inMsg = in.readUTF ();
-                        msgHistoryArea.append ( inMsg + "\n" );
-                        msgHistoryArea.setCaretPosition (msgHistoryArea.getDocument ().getLength () );
+                        String inMsg = in.readUTF ();
+                        if (inMsg.startsWith ( "/" )) {
+                            if (inMsg.startsWith ( "/userslist" )) {
+                                String[] users = inMsg.split ( " " );
+                                clientListArea.setText ( "" );
+                                for ( int i = 1 ; i < users.length ; i++ ) {
+                                    clientListArea.append ( users[ i ] + "\n" );
+                                }
+                            }else if (inMsg.startsWith("/count")){
+                                String[] count = inMsg.split(" ");
+                                countOfClientsField.setText("");
+                                countOfClientsField.setText("Онлайн: " + count[1]);
+                            }
+                        } else {
+                            msgHistoryArea.append ( inMsg + "\n" );
+                            msgHistoryArea.setCaretPosition ( msgHistoryArea.getDocument ().getLength () );
+                        }
                     }
                 } catch (IOException e) {
+                    sendMsg ( "/end" );
+                    setAuthorised ( false );
                     e.printStackTrace ();
                 }
 
         }
         ).start ();
+        addWindowListener ( new WindowListener () {
+            @Override
+            public void windowOpened(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+            sendMsg ( "/end" );
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
+            }
+        } );
         setVisible ( true );
     }
     public void sendMsg (String msg){
