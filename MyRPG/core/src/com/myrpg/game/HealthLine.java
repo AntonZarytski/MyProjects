@@ -12,10 +12,12 @@ public class HealthLine {
         this.position = position;
     }
 
-    public HealthLine(){
+    public HealthLine(int posX, int posY){
         texture = new Texture("HealthLine.png");
+        this.position.x = posX;
+        this.position.y = posY;
     }
     public void render(SpriteBatch batch){
-        batch.draw(texture, position.x++, position.y);
+        batch.draw(texture, position.x, position.y);
     }
 }

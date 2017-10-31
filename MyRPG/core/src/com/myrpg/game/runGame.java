@@ -12,7 +12,6 @@ public class runGame extends ApplicationAdapter {
 	Hero hero;
 	Enemy monster;
 	Person currentUnit;
-	HealthLine[] hl;
 	
 	@Override
 	public void create () {
@@ -20,13 +19,11 @@ public class runGame extends ApplicationAdapter {
 		background = new Background();
 		hero = new Hero();
 		hero.setPosition(new Vector2(200, 50));
+		hero.createHealthLine();
 		monster = new Enemy();
 		monster.setPosition(new Vector2(700, 50));
+		monster.createHealthLine();
 		currentUnit = hero;
-		hl = new HealthLine[99];
-		for (int i = 0; i<hl.length; i++){
-			hl[i] = new HealthLine();
-		}
 	}
 
 	@Override
@@ -39,9 +36,8 @@ public class runGame extends ApplicationAdapter {
 		background.render(batch);
 		hero.render(batch);
 		monster.render(batch);
-		for (int i = 0; i<hl.length; i++){
-			hl[i].render(batch);
-		}
+		hero.renderHealthLine(batch);
+		monster.render(batch);
 		batch.end();
 	}
 

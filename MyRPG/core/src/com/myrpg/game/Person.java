@@ -36,8 +36,15 @@ public abstract class Person {
     public Rectangle getRect() {
         return rect;
     }
-    public void createHealthLine(SpriteBatch batch){
-
+    public void createHealthLine(){
+        for (int i = 0; i <hl.length ; i++) {
+            hl[i] = new HealthLine((int)position.x+20+i, (int)position.y+520);
+        }
+    }
+    public void renderHealthLine(SpriteBatch batch){
+        for (int i = 0; i <hl.length ; i++) {
+            hl[i].render(batch);
+        }
     }
 
     public void takeDamage(int dmg){
