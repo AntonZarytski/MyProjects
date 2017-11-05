@@ -7,14 +7,14 @@ import com.badlogic.gdx.math.Vector2;
 public class Enemy extends Person {
 private Hero target;
 private float sleepTimer;
-    public Enemy(Vector2 position, Hero target){
-        super(position, new Texture("Enemy.png"), new Texture("EnemyDeath.png"));
+    public Enemy(runGame game, Vector2 position, Hero target){
+        super(game, position, new Texture("Enemy.png"), new Texture("EnemyDeath.png"));
         this.target = target;
         this.maxHp = 50;
         this.hp=maxHp;
         this.name="Enemy";
         this.level=1;
-        this.strenght=10;
+        this.strenght=3;
         this.dexterity=2;
         this.endurance=1;
         this.spellpower =0;

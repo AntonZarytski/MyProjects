@@ -9,14 +9,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 public abstract class Person {
+    protected runGame game;
     protected Texture texture;
     protected Texture textureDeath;
     protected String name;
     protected Integer hp;
     protected String hpStr;
-    protected final String miss= "miss!";
-    protected boolean isMiss;
-    protected boolean iscritAttack;
     protected int maxHp;
     protected HealthLine hl;
     protected BitmapFont font;
@@ -40,8 +38,9 @@ public abstract class Person {
     protected float attackAction;
     protected float takeDamageAction;
 
-    public Person (Vector2 position, Texture texture, Texture textureDeath){
+    public Person (runGame game, Vector2 position, Texture texture, Texture textureDeath){
         this.isAlive=true;
+        this.game = game;
         this.position = position;
         this.texture = texture;
         this.textureDeath = textureDeath;
@@ -82,20 +81,21 @@ public abstract class Person {
     public void meleeAttack(Person enemy){
         float critAttack=1;
         this.attackAction = 1.0f;
-        float chanceToMiss = (enemy.dexterity + enemy.level) /100;
-        float chanceToAttack = (this.dexterity+this.level )/100;
-        if(chanceToAttack>chanceToMiss){
-            if(Math.random() < chanceToMiss){
-                isMiss=true;
-                return;
-            }
-        }else {
-            if(Math.random() < chanceToAttack){
-                iscritAttack = true;
-                critAttack=1.25f;
-            }
+        float chanceToMiss = (enemy.dexterity + enemy.level) /100f;
+        float chanceToAttack = (this.dexterity+this.level )/100f;
+        if(Math.random() < chanceToMiss){
+            game.addMessage("MISS", enemy.getPosition().x+enemy.texture.getWidth()*1.1f,enemy.getPosition().y+enemy.texture.getHeight()*1.1f );
+            return;
         }
+        if(chanceToAttack > Math.random()){
+            System.out.println(Math.random() < chanceToAttack);
+            critAttack=1.5f;
+        }else critAttack = 1f;
         int dmg = Math.round((this.strenght - enemy.defence)*critAttack);
+        if(critAttack==1.5f){
+            game.addMessage("CRIT! \n-" + dmg, enemy.getPosition().x+enemy.texture.getWidth()*1.1f,enemy.getPosition().y+enemy.texture.getHeight()*1.1f );
+        }
+        game.addMessage("-" + dmg, enemy.getPosition().x+enemy.texture.getWidth()*1.1f,enemy.getPosition().y+enemy.texture.getHeight()*1.1f );
         critAttack = 1;
         if(dmg<0){
             dmg=0;
@@ -109,6 +109,7 @@ public abstract class Person {
         if(scaleX<1)scaleX=0;
         hpStr = hp.toString();
         if(isAlive) {
+            //рисуем хелзбар у живых персонажей
             batch.draw(hl.textureBack, position.x+texture.getWidth()*0.25f-2+dx, position.y+texture.getHeight()*1.05f-2);
             batch.draw(hl.textureFront,
                     position.x+texture.getWidth()*0.25f+dx,
@@ -133,6 +134,7 @@ public abstract class Person {
             if (takeDamageAction > 0) {
                 batch.setColor(1f, 1f - takeDamageAction, 1f - takeDamageAction, 1f);
             }
+            //рисуем живых персонажей
             batch.draw(texture,
                     position.x + dx,
                     position.y, 0,
@@ -149,6 +151,7 @@ public abstract class Person {
                     flip,
                     false);
         }else {
+            //рисуем трупы
             batch.draw(textureDeath,
                     position.x ,
                     position.y, 0,
@@ -165,15 +168,6 @@ public abstract class Person {
                     flip,
                     false);
         }
-
-        if(isMiss && takeDamageAction>0) {
-            hpLabel.setText(miss);
-            hpLabel.setX(position.x+texture.getWidth()*1.25f);
-            hpLabel.setY(position.y+texture.getHeight());
-            hpLabel.draw(batch, 1f-takeDamageAction);
-            if(takeDamageAction>0)
-            isMiss=false;
-        }
         batch.setColor(1f,1f,1f,1f);
     }
     public void update(float dt){
@@ -187,21 +181,21 @@ public abstract class Person {
             isAlive = false;
         }
     }
-    class HealthLine {
-        Texture textureFront;
-        Texture textureBack;
-        Vector2 position;
-        Label.LabelStyle labelStyleWhite;
+}
+class HealthLine {
+    Texture textureFront;
+    Texture textureBack;
+    Vector2 position;
+    Label.LabelStyle labelStyleWhite;
 
-        public void setPosition(Vector2 position) {
-            this.position = position;
-        }
+    public void setPosition(Vector2 position) {
+        this.position = position;
+    }
 
-        public HealthLine(){
-            textureFront = new Texture("HealthLine.png");
-            textureBack = new Texture("HealthLineBack.png");
-            labelStyleWhite = new Label.LabelStyle(new BitmapFont(), Color.WHITE);
-        }
-
+    public HealthLine(){
+        textureFront = new Texture("HealthLine.png");
+        textureBack = new Texture("HealthLineBack.png");
+        labelStyleWhite = new Label.LabelStyle(new BitmapFont(), Color.WHITE);
     }
 }
+

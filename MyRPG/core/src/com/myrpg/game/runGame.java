@@ -23,15 +23,16 @@ public class runGame extends ApplicationAdapter {
 	private int selectedUnit;
 	private Texture textureSelector;
 	private List<Button> btnGUI;
+	private FlyingText[] msgs;
 
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		background = new Background();
 		textureSelector = new Texture("Selector.png");
-		player = new Hero(new Vector2(200, 150));
-		monster = new Enemy(new Vector2(720, 15), player);
-		monster2 = new Enemy(new Vector2(580, 285), player);
+		player = new Hero(this, new Vector2(200, 150));
+		monster = new Enemy(this, new Vector2(720, 15), player);
+		monster2 = new Enemy(this, new Vector2(580, 285), player);
 		units = new ArrayList<Person>();
 		units.add(player);
 		units.add(monster);
@@ -40,7 +41,19 @@ public class runGame extends ApplicationAdapter {
 		selectedUnit=0;
 		btnGUI = new ArrayList<Button>();
 		btnGUI.add(new Button("attack", new Texture("Button.png"), new Rectangle(200, 20, 50, 50)));
+		msgs = new FlyingText[50];
+		for (int i = 0; i < msgs.length; i++) {
+			msgs[i] = new FlyingText();
+		}
+	}
 
+	public void addMessage(String text, float x, float y) {
+		for (int i = 0; i < msgs.length; i++) {
+			if (!msgs[i].isActive()) {
+				msgs[i].setup(text, x, y);
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -69,6 +82,11 @@ public class runGame extends ApplicationAdapter {
 		}
 		for (int i = 0; i <btnGUI.size() ; i++) {
 			btnGUI.get(i).render(batch);
+		}
+		for (int i = 0; i < msgs.length; i++) {
+			if (msgs[i].isActive()) {
+				msgs[i].render(batch);
+			}
 		}
 		batch.end();
 	}
@@ -99,23 +117,11 @@ public class runGame extends ApplicationAdapter {
 				nextTurn();
 			}
 		}
-		// атака по клику на юнита
-	/*	for (int i = 0; i < units.size() ; i++) {
-			if(!units.get(i).isAlive){
-				currentUnit++;
-				continue;
+		for (int i = 0; i < msgs.length; i++) {
+			if (msgs[i].isActive()) {
+				msgs[i].update(dt);
 			}
-			if (currentUnit>units.size()-1) {
-				currentUnit = 0;
-			}
-			if (currentUnit!=i && InputHandler.checkClickInRect(units.get(i).getRect())) {
-						units.get(currentUnit).meleeAttack(units.get(i));
-
-				currentUnit++;
-
-				break;
-			}
-		}*/
+		}
 		}
 
 	public boolean isHeroTurn(){
