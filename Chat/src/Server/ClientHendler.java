@@ -63,9 +63,15 @@ public class ClientHendler {
                        }
                        if(inMsg.startsWith("/new")){
                            String elements[] = inMsg.split(" ");
-
-
-                       }
+                            if(!DB.isLoginBusy(elements[1])&& elements.length==4){
+                                DB.createNewUser(elements[1], elements[2], elements[3]);
+                                this.name = elements[3];
+                                MyServer.sendMsgForAll(this.name + " зашел в чат");
+                                MyServer.broadcastUsersList();
+                                isOnline = true;
+                                MyServer.broadcastCountofUsers();
+                            }else sendMsg("Данный логин уже занят");
+                       }else  sendMsg("Необходимо заполнить все поля");
                    }
                    while (true) {
                        String inMsg = in.readUTF ();

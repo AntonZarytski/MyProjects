@@ -101,6 +101,13 @@ nb-configuration.xml
 /local.properties
 .gradle/
 gradle-app.setting
+/build/
+/android/build/
+/core/build/
+/desktop/build/
+/html/build/
+/ios/build/
+/ios-moe/build/
 
 ## OS Specific
 .DS_Store
@@ -116,4 +123,3 @@ Thumbs.db
 !/ios-moe/xcode/*.xcodeproj/xcshareddata
 !/ios-moe/xcode/*.xcodeproj/project.pbxproj
 /ios-moe/xcode/native/
-/gradle/

@@ -3,27 +3,44 @@ package com.myrpg.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class runGame extends ApplicationAdapter {
 	public SpriteBatch batch;
-	Background background;
-	Hero hero;
-	Enemy monster;
-	Person currentUnit;
-	
+	private Background background;
+	private Hero player;
+	private Enemy monster;
+	private Enemy monster2;
+	private List<Person> units;
+	private int currentUnit;
+	private int selectedUnit;
+	private Texture textureSelector;
+	private List<Button> btnGUI;
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		background = new Background();
-		hero = new Hero();
-		hero.setPosition(new Vector2(200, 50));
-		hero.createHealthLine();
-		monster = new Enemy();
-		monster.setPosition(new Vector2(700, 50));
-		monster.createHealthLine();
-		currentUnit = hero;
+		textureSelector = new Texture("Selector.png");
+		player = new Hero(new Vector2(200, 150));
+		monster = new Enemy(new Vector2(720, 15), player);
+		monster2 = new Enemy(new Vector2(580, 285), player);
+		units = new ArrayList<Person>();
+		units.add(player);
+		units.add(monster);
+		units.add(monster2);
+		currentUnit=0;
+		selectedUnit=0;
+		btnGUI = new ArrayList<Button>();
+		btnGUI.add(new Button("attack", new Texture("Button.png"), new Rectangle(200, 20, 50, 50)));
+
 	}
 
 	@Override
@@ -34,30 +51,85 @@ public class runGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 		background.render(batch);
-		hero.render(batch);
-		monster.render(batch);
-		hero.renderHealthLine(batch);
-		monster.render(batch);
+		for (int i = 0; i <units.size() ; i++) {
+			if (isHeroTurn()&& currentUnit==i && units.get(i).isAlive){
+				batch.setColor(0,1,0,0.2f);
+					batch.draw(textureSelector, units.get(i).getPosition().x-units.get(i).getTexture().getWidth()*0.2f, units.get(i).getPosition().y+units.get(i).getTexture().getHeight()*0.015f  );
+			}
+			if (selectedUnit==i && units.get(i).isAlive){
+				batch.setColor(1,0,0,0.2f);
+				if(units.get(i)instanceof Hero){
+					batch.draw(textureSelector, units.get(i).getPosition().x-units.get(i).getTexture().getWidth()*0.2f, units.get(i).getPosition().y+units.get(i).getTexture().getHeight()*0.015f  );
+				}else {
+					batch.draw(textureSelector, units.get(i).getPosition().x+units.get(i).getTexture().getWidth()*0.1f, units.get(i).getPosition().y+units.get(i).getTexture().getHeight()*0.015f  );
+				}
+			}
+			batch.setColor(1,1,1,1);
+			units.get(i).render(batch);
+		}
+		for (int i = 0; i <btnGUI.size() ; i++) {
+			btnGUI.get(i).render(batch);
+		}
 		batch.end();
 	}
 
-	public void update(float dt){
-		hero.update(dt);
-		monster.update(dt);
-		if(currentUnit == hero){
-			if (InputHandler.checkClickInRect(monster.rect)) {
-				hero.meleeAttack(monster);
-				currentUnit = monster;
+	public void update(float dt) {
+		for (int i = 0; i < units.size(); i++) {
+			units.get(i).update(dt);
+			if (InputHandler.checkClickInRect(units.get(i).getRect())) {
+				selectedUnit = i;
 			}
 		}
-		if(currentUnit == monster){
-			if(InputHandler.checkClickInRect(hero.rect)){
-				monster.meleeAttack(hero);
-				currentUnit = hero;
+		if (isHeroTurn()) {
+			for (int i = 0; i < btnGUI.size(); i++) {
+				if (btnGUI.get(i).checkClick()) {
+					String action = btnGUI.get(i).getAction();
+					if (action.equals("attack")) {
+						if (units.get(selectedUnit) instanceof Enemy) {
+							player.meleeAttack(units.get(selectedUnit));
+							nextTurn();
+							selectedUnit=0;
+						}
+					}
+				}
 			}
 		}
+		if (!isHeroTurn()&& player.isAlive) {
+			if(((Enemy) units.get(currentUnit)).ai(dt)){
+				nextTurn();
+			}
+		}
+		// атака по клику на юнита
+	/*	for (int i = 0; i < units.size() ; i++) {
+			if(!units.get(i).isAlive){
+				currentUnit++;
+				continue;
+			}
+			if (currentUnit>units.size()-1) {
+				currentUnit = 0;
+			}
+			if (currentUnit!=i && InputHandler.checkClickInRect(units.get(i).getRect())) {
+						units.get(currentUnit).meleeAttack(units.get(i));
+
+				currentUnit++;
+
+				break;
+			}
+		}*/
+		}
+
+	public boolean isHeroTurn(){
+		return units.get(currentUnit)instanceof Hero;
 	}
-	
+	public void nextTurn(){
+		do {
+			currentUnit++;
+			if (currentUnit >= units.size()) {
+				currentUnit = 0;
+			}
+		}while (!units.get(currentUnit).isAlive);
+		units.get(currentUnit).getTurn();
+	}
 	@Override
 	public void dispose () {
 		batch.dispose();

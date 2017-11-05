@@ -34,6 +34,7 @@ public class ClientWindow extends JFrame {
 
     public void setAuthorised(boolean authorised) {
         isAuthorised = authorised;
+        layer.setVisible(!authorised);
         authPanel.setVisible (!isAuthorised);
         sendMsgPanel.setVisible ( isAuthorised );
         clientListPanel.setVisible ( isAuthorised );
@@ -59,6 +60,13 @@ public class ClientWindow extends JFrame {
         nickNameField = new JTextField ( "Имя" );
         sendAuthButton = new JButton ( "Войти в чат" );
         back = new JButton("Назад");
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                startWindow.setVisible(true);
+                authPanel.setVisible(false);
+            }
+        });
         authPanel.add(loginField);
         authPanel.add(passwordField);
         authPanel.add(nickNameField);
@@ -193,11 +201,11 @@ public class ClientWindow extends JFrame {
             }
         });
         layer = new JLayeredPane();
+        startWindow.setBounds(0,0,640,70);
+        authPanel.setBounds(0,0,640,70);
         layer.add(startWindow, new Integer(1));
         layer.add(authPanel, new Integer(0));
-        layer.setBounds(0,0 ,720, 100);
         add(layer);
-        layer.setVisible(true);
 
         new Thread (()->{
                 try {
@@ -242,42 +250,7 @@ public class ClientWindow extends JFrame {
 
         }
         ).start ();
-        addWindowListener ( new WindowListener () {
-            @Override
-            public void windowOpened(WindowEvent e) {
 
-            }
-
-            @Override
-            public void windowClosing(WindowEvent e) {
-            sendMsg ( "/end" );
-            }
-
-            @Override
-            public void windowClosed(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowIconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowActivated(WindowEvent e) {
-
-            }
-
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-
-            }
-        } );
         setVisible ( true );
     }
     public void sendMsg (String msg){
