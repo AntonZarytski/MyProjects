@@ -7,9 +7,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.myrpg.game.effects.DefenceStanceEffect;
+import com.myrpg.game.effects.Effect;
+import com.myrpg.game.effects.RegenerationEffect;
+
+import java.util.ArrayList;
 
 public abstract class Person {
-    protected runGame game;
+    protected GameScreen game;
     protected Texture texture;
     protected Texture textureDeath;
     protected String name;
@@ -20,6 +25,7 @@ public abstract class Person {
     protected BitmapFont font;
     protected Label hpLabel;
     protected boolean isAlive;
+    protected ArrayList<Effect> effects;
 
     protected int level;
         //Primary skills
@@ -28,23 +34,65 @@ public abstract class Person {
     protected int endurance;
     protected int spellpower;
     protected int knowlege;
-        //secondary skills
     protected int defence;
 
 
     protected Vector2 position;
     protected Rectangle rect;
     protected boolean flip;
+
     protected float attackAction;
     protected float takeDamageAction;
 
-    public Person (runGame game, Vector2 position, Texture texture, Texture textureDeath){
+    public int getLevel() {
+        return level;
+    }
+
+    public int getStrenght() {
+        return strenght;
+    }
+
+    public int getDexterity() {
+        return dexterity;
+    }
+
+    public int getDefence() {
+        return defence;
+    }
+    public void setDefence(int defence) {
+        this.defence = defence;
+    }
+
+    public Vector2 getPosition() { return position; }
+
+    public Rectangle getRect() { return rect; }
+
+    public boolean isAlive() { return isAlive; }
+
+    public int getStrenghtgetStrenght() {
+        return strenght;
+    }
+
+    public int getEndurance() {
+        return endurance;
+    }
+
+    public int getSpellpower() {
+        return spellpower;
+    }
+
+    public int getKnowlege() {
+        return knowlege;
+    }
+
+    public Person (GameScreen game, Vector2 position, Texture texture, Texture textureDeath){
         this.isAlive=true;
         this.game = game;
         this.position = position;
         this.texture = texture;
         this.textureDeath = textureDeath;
         this.rect = new Rectangle(position.x, position.y, texture.getWidth(), texture.getHeight());
+        this.effects = new ArrayList<Effect>();
     }
 
     public void setPosition(Vector2 position) {
@@ -57,56 +105,59 @@ public abstract class Person {
         return texture;
     }
 
-    public Vector2 getPosition() {
-        return position;
+    public void getTurn() {
+        for (int i = effects.size() - 1; i >= 0; i--) {
+            effects.get(i).tick();
+            if (effects.get(i).isEnded()) {
+                effects.get(i).end();
+                effects.remove(i);
+            }
+        }
+    }
+    public void deffenceStance(int round){
+        DefenceStanceEffect dse = new DefenceStanceEffect();
+        dse.start(game.getInfoSystem(), this, round);
+        effects.add(dse);
     }
 
-    public Rectangle getRect() {
-        return rect;
+    public void regenerate(int rounds) {
+        RegenerationEffect re = new RegenerationEffect();
+        re.start(game.getInfoSystem(), this, rounds);
+        effects.add(re);
     }
 
-    public void createHelathLine(){
-        font = new BitmapFont();
-        hl = new HealthLine();
-        hpStr = hp.toString();
-        hl.setPosition( new Vector2((position.x+texture.getWidth()*0.25f), (position.y+texture.getHeight()*1.05f)));
-        hpLabel = new Label(hpStr, hl.labelStyleWhite);
+    public void heal(float percent){
+        float heal = this.maxHp*(percent/100);
+        if(this.hp+heal>this.maxHp){
+            heal= this.maxHp-this.hp;
+        }
+        this.hp += (int)heal;
+        game.getInfoSystem().addMessage("HP + " + (int)heal,FlyingText.Colors.GREEN, this);
     }
-    public abstract void getTurn();
-
     public void takeDamage(int dmg){
         this.takeDamageAction = 1.0f;
         hp-=dmg;
     }
     public void meleeAttack(Person enemy){
         float critAttack=1;
-        this.attackAction = 1.0f;
-        float chanceToMiss = (enemy.dexterity + enemy.level) /100f;
-        float chanceToAttack = (this.dexterity+this.level )/100f;
-        if(Math.random() < chanceToMiss){
-            game.addMessage("MISS", enemy.getPosition().x+enemy.texture.getWidth()*1.1f,enemy.getPosition().y+enemy.texture.getHeight()*1.1f );
-            return;
-        }
-        if(chanceToAttack > Math.random()){
-            System.out.println(Math.random() < chanceToAttack);
-            critAttack=1.5f;
-        }else critAttack = 1f;
-        int dmg = Math.round((this.strenght - enemy.defence)*critAttack);
-        if(critAttack==1.5f){
-            game.addMessage("CRIT! \n-" + dmg, enemy.getPosition().x+enemy.texture.getWidth()*1.1f,enemy.getPosition().y+enemy.texture.getHeight()*1.1f );
-        }
-        game.addMessage("-" + dmg, enemy.getPosition().x+enemy.texture.getWidth()*1.1f,enemy.getPosition().y+enemy.texture.getHeight()*1.1f );
-        critAttack = 1;
-        if(dmg<0){
-            dmg=0;
-        }
-        enemy.takeDamage(dmg);
+        attackAction = 1.0f;
+        if(!Calculator.getTargetEvaded(this, enemy)){
+            if(Calculator.getAtackerCrit(this, enemy)){
+                critAttack=1.5f;
+            }
+            int dmg = (int)(Calculator.getMeleeDamage(this, enemy)*critAttack);
+            if(critAttack==1.5f){
+                game.getInfoSystem().addMessage("CRIT! \n-" + dmg, FlyingText.Colors.RED ,enemy);
+            }
+            game.getInfoSystem().addMessage("-" + dmg, FlyingText.Colors.RED, enemy);
+            enemy.takeDamage(dmg);
+        }else game.getInfoSystem().addMessage("MISS",FlyingText.Colors.WHITE, enemy );
     }
+
     public void render(SpriteBatch batch){
         float dx = 10f*(float)Math.sin(1f - attackAction)*3.14f;
         if(!flip) dx*=-1;
         float scaleX = 100*hp*1.0f/maxHp;
-        if(scaleX<1)scaleX=0;
         hpStr = hp.toString();
         if(isAlive) {
             //рисуем хелзбар у живых персонажей
@@ -171,16 +222,25 @@ public abstract class Person {
         batch.setColor(1f,1f,1f,1f);
     }
     public void update(float dt){
-        if(takeDamageAction > 0){
-            takeDamageAction-=dt;
+        if (takeDamageAction > 0) {
+            takeDamageAction -= dt;
         }
-        if(attackAction > 0){
-            attackAction-=dt;
+        if (attackAction > 0) {
+            attackAction -= dt;
         }
         if(hp<=0){
             isAlive = false;
         }
     }
+
+    public void createHelathLine(){
+        font = new BitmapFont();
+        hl = new HealthLine();
+        hpStr = hp.toString();
+        hl.setPosition( new Vector2((position.x+texture.getWidth()*0.25f), (position.y+texture.getHeight()*1.05f)));
+        hpLabel = new Label(hpStr, hl.labelStyleWhite);
+    }
+
 }
 class HealthLine {
     Texture textureFront;

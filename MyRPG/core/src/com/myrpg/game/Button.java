@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
-public class Button {
+public abstract class Button {
     private Texture texture;
     private Rectangle rect;
     private String action;
@@ -15,7 +15,11 @@ public class Button {
         this.action = action;
     }
     public boolean checkClick(){
-        return InputHandler.checkClickInRect(rect);
+        if(InputHandler.checkClickInRect(rect)){
+            action();
+            return true;
+        }
+        return false;
     }
     public void render(SpriteBatch batch){
         batch.draw(texture, rect.getX(), rect.getY());
@@ -24,4 +28,5 @@ public class Button {
     public String getAction() {
         return action;
     }
+    public abstract void action();
 }
