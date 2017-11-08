@@ -26,16 +26,9 @@ public abstract class Person {
     protected Label hpLabel;
     protected boolean isAlive;
     protected ArrayList<Effect> effects;
+    protected Skillz skillz;
 
     protected int level;
-        //Primary skills
-    protected int strenght;
-    protected int dexterity;
-    protected int endurance;
-    protected int spellpower;
-    protected int knowlege;
-    protected int defence;
-
 
     protected Vector2 position;
     protected Rectangle rect;
@@ -48,44 +41,14 @@ public abstract class Person {
         return level;
     }
 
-    public int getStrenght() {
-        return strenght;
-    }
-
-    public int getDexterity() {
-        return dexterity;
-    }
-
-    public int getDefence() {
-        return defence;
-    }
-    public void setDefence(int defence) {
-        this.defence = defence;
-    }
-
     public Vector2 getPosition() { return position; }
 
     public Rectangle getRect() { return rect; }
 
     public boolean isAlive() { return isAlive; }
 
-    public int getStrenghtgetStrenght() {
-        return strenght;
-    }
-
-    public int getEndurance() {
-        return endurance;
-    }
-
-    public int getSpellpower() {
-        return spellpower;
-    }
-
-    public int getKnowlege() {
-        return knowlege;
-    }
-
     public Person (GameScreen game, Vector2 position, Texture texture, Texture textureDeath){
+        skillz = new Skillz();
         this.isAlive=true;
         this.game = game;
         this.position = position;
@@ -99,6 +62,10 @@ public abstract class Person {
         this.position = position;
         this.rect = new Rectangle(position.x, position.y, texture.getWidth(), texture.getHeight());
 
+    }
+
+    public Skillz getSkillz() {
+        return skillz;
     }
 
     public Texture getTexture() {
@@ -116,13 +83,13 @@ public abstract class Person {
     }
     public void deffenceStance(int round){
         DefenceStanceEffect dse = new DefenceStanceEffect();
-        dse.start(game.getInfoSystem(), this, round);
+        dse.start(game.getInfoSystem(), this, round, 5);
         effects.add(dse);
     }
 
     public void regenerate(int rounds) {
         RegenerationEffect re = new RegenerationEffect();
-        re.start(game.getInfoSystem(), this, rounds);
+        re.start(game.getInfoSystem(), this, rounds, 5);
         effects.add(re);
     }
 
@@ -258,4 +225,3 @@ class HealthLine {
         labelStyleWhite = new Label.LabelStyle(new BitmapFont(), Color.WHITE);
     }
 }
-
