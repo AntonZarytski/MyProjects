@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class FlyingText {
     public enum  Colors{
-        RED(1.0f, 0.0f, 0.0f), GREEN(0.0f, 0.7f, 0.0f), WHITE(1.0f, 1.0f, 1.0f);
+        RED(1.0f, 0.0f, 0.0f), GREEN(0.0f, 0.1f, 0.0f), WHITE(1.0f, 1.0f, 1.0f);
         float r;
         float g;
         float b;

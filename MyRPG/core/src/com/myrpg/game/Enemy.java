@@ -2,12 +2,10 @@ package com.myrpg.game;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-
-
+import com.myrpg.game.action.BaseAction;
 
 
 public class Enemy extends Person {
-private Hero target;
     public Enemy(GameScreen game, Vector2 position, Hero target){
         super(game, position, new Texture("Enemy.png"), new Texture("EnemyDeath.png"));
         this.skillz = new Skillz(5, 1,2,1,0,0 );
@@ -20,18 +18,19 @@ private Hero target;
         createHelathLine();
     }
 
-    public boolean ai(float dt){
+    public boolean ai(float dt, BaseAction mainAction){
         if(!game.canIMakeTurn()) return false;
-        if(1.0f*this.hp/this.maxHp*100<40*Math.random() && Math.random()>0.33f){
-            heal(15);
+      /*  if(1.0f*this.hp/this.maxHp*100<40*Math.random() && Math.random()>0.33f){
+            changeHP(15, "Rest");
             return true;
         }
         if(Math.random()>0.9f){
             deffenceStance(1);
             return true;
         }
-        meleeAttack(target);
-        return true;
+        meleeAttack(target);*/
+
+        return mainAction.action(this);
     }
 
 }

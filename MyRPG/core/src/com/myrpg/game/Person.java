@@ -7,14 +7,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.myrpg.game.effects.DefenceStanceEffect;
 import com.myrpg.game.effects.Effect;
-import com.myrpg.game.effects.RegenerationEffect;
 
 import java.util.ArrayList;
 
 public abstract class Person {
     protected GameScreen game;
+    protected Person target;
     protected Texture texture;
     protected Texture textureDeath;
     protected String name;
@@ -37,6 +36,22 @@ public abstract class Person {
     protected float attackAction;
     protected float takeDamageAction;
 
+    public void setAttackAction(float attackAction) {
+        this.attackAction = attackAction;
+    }
+
+    public Person getTarget() {
+        return target;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
+    }
+
+    public GameScreen getGame() {
+        return game;
+    }
+
     public int getLevel() {
         return level;
     }
@@ -47,6 +62,14 @@ public abstract class Person {
 
     public boolean isAlive() { return isAlive; }
 
+    public void addEffect(Effect effect){
+        effects.add(effect);
+    }
+
+    public void setTarget(Person target) {
+        this.target = target;
+    }
+
     public Person (GameScreen game, Vector2 position, Texture texture, Texture textureDeath){
         skillz = new Skillz();
         this.isAlive=true;
@@ -56,12 +79,6 @@ public abstract class Person {
         this.textureDeath = textureDeath;
         this.rect = new Rectangle(position.x, position.y, texture.getWidth(), texture.getHeight());
         this.effects = new ArrayList<Effect>();
-    }
-
-    public void setPosition(Vector2 position) {
-        this.position = position;
-        this.rect = new Rectangle(position.x, position.y, texture.getWidth(), texture.getHeight());
-
     }
 
     public Skillz getSkillz() {
@@ -81,44 +98,27 @@ public abstract class Person {
             }
         }
     }
-    public void deffenceStance(int round){
-        DefenceStanceEffect dse = new DefenceStanceEffect();
-        dse.start(game.getInfoSystem(), this, round, 5);
-        effects.add(dse);
-    }
 
-    public void regenerate(int rounds) {
-        RegenerationEffect re = new RegenerationEffect();
-        re.start(game.getInfoSystem(), this, rounds, 5);
-        effects.add(re);
-    }
-
-    public void heal(float percent){
-        float heal = this.maxHp*(percent/100);
-        if(this.hp+heal>this.maxHp){
-            heal= this.maxHp-this.hp;
+    public void changeHP (int value, String couse) {
+        if (hp + value > maxHp) {
+            value = maxHp - hp;
         }
-        this.hp += (int)heal;
-        game.getInfoSystem().addMessage("HP + " + (int)heal,FlyingText.Colors.GREEN, this);
+        hp += value;
+        if(hp < 0){
+            hp = 0;
+            isAlive = false;
+        }
+        if (value < 0) {
+            game.getInfoSystem().addMessage(couse + " -" + value, FlyingText.Colors.RED, this);
+            takeDamageAction = 1.0f;
+        }
+        if (value >= 0) {
+            game.getInfoSystem().addMessage(couse + " + " + value, FlyingText.Colors.GREEN, this);
+        }
     }
-    public void takeDamage(int dmg){
-        this.takeDamageAction = 1.0f;
-        hp-=dmg;
-    }
-    public void meleeAttack(Person enemy){
-        float critAttack=1;
-        attackAction = 1.0f;
-        if(!Calculator.getTargetEvaded(this, enemy)){
-            if(Calculator.getAtackerCrit(this, enemy)){
-                critAttack=1.5f;
-            }
-            int dmg = (int)(Calculator.getMeleeDamage(this, enemy)*critAttack);
-            if(critAttack==1.5f){
-                game.getInfoSystem().addMessage("CRIT! \n-" + dmg, FlyingText.Colors.RED ,enemy);
-            }
-            game.getInfoSystem().addMessage("-" + dmg, FlyingText.Colors.RED, enemy);
-            enemy.takeDamage(dmg);
-        }else game.getInfoSystem().addMessage("MISS",FlyingText.Colors.WHITE, enemy );
+
+    public void miss(){
+        game.getInfoSystem().addMessage("MISS",FlyingText.Colors.WHITE, this);
     }
 
     public void render(SpriteBatch batch){
@@ -194,9 +194,6 @@ public abstract class Person {
         }
         if (attackAction > 0) {
             attackAction -= dt;
-        }
-        if(hp<=0){
-            isAlive = false;
         }
     }
 
