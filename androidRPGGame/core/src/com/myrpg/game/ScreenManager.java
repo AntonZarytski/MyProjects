@@ -4,6 +4,10 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.myrpg.game.screens.BattleScreen;
+import com.myrpg.game.screens.LoadScreen;
+import com.myrpg.game.screens.MenuScreen;
+import com.myrpg.game.screens.ScreenLevelEnd;
 
 /**
  хранилище всех глобальных настроек экранов
@@ -11,10 +15,13 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class ScreenManager {
     private RunGame game;
+    private MenuScreen menuScreen;
+    private ScreenLevelEnd screenLevelEnd;
     private Viewport viewport;
     private BattleScreen battleScreen;
+    private LoadScreen loadScreen;
     public enum ScreenTypes{
-        MENU, BATTLE
+        MENU, BATTLE, LEVELEND
     }
     private static final ScreenManager ourInstance = new ScreenManager();
 
@@ -31,6 +38,9 @@ public class ScreenManager {
     public void init(RunGame game, SpriteBatch batch){
         this.game = game;
         this.battleScreen = new BattleScreen(batch);
+        this.menuScreen = new MenuScreen(batch);
+        this.screenLevelEnd = new ScreenLevelEnd(batch);
+        this.loadScreen = new LoadScreen(batch);
         // отвечает за пропорциональную отрисовку экрана
         this.viewport = new FitViewport(1920, 1080);
         this.viewport.update(1920, 1080, true);
@@ -47,14 +57,22 @@ public class ScreenManager {
             screen.dispose();
         }
         switch (type){
+            case MENU:
+                game.setScreen(loadScreen);
+                Assets.getInstance().loadAssets(ScreenTypes.MENU);
+                game.setScreen(menuScreen);
+                break;
             case BATTLE:
                 Assets.getInstance().loadAssets(ScreenTypes.BATTLE);
                 game.setScreen(battleScreen);
                 break;
+            case LEVELEND:
+                Assets.getInstance().loadAssets(ScreenTypes.LEVELEND);
+                game.setScreen(screenLevelEnd);
+                break;
         }
     }
     public void dispose(){
-        Assets.getInstance().clear();
         Assets.getInstance().getAssetManager().dispose();
     }
 

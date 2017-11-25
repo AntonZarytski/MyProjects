@@ -7,12 +7,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class RunGame extends Game {
 	SpriteBatch batch;
+	public static final int SCREEN_WIDTH = 1920;
+	public static final int SCREEN_HEIGHT = 1080;
 
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		ScreenManager.getInstance().init(this, batch);
-		ScreenManager.getInstance().swithScreen(ScreenManager.ScreenTypes.BATTLE);
+		ScreenManager.getInstance().swithScreen(ScreenManager.ScreenTypes.MENU);
 	}
 
 	@Override

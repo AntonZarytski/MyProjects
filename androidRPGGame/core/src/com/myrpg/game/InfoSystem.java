@@ -21,7 +21,7 @@ public class InfoSystem {
         }
     }
     public void addMessage(String text,FlyingText.Colors color, Unit unit){
-        addMessage(text, color, unit.getPosition().x + unit.getTexture().getWidth()*0.8f, unit.getPosition().y + unit.getTexture().getHeight()*0.8f );
+        addMessage(text, color, unit.getPosition().x + unit.getWIDTH()*0.8f, unit.getPosition().y + unit.getHEIGHT()*0.8f );
     }
 
     public  void render(SpriteBatch batch){

@@ -1,26 +1,23 @@
 package com.myrpg.game;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.myrpg.game.action.BaseAction;
 import com.myrpg.game.action.DefenceStanceAction;
+import com.myrpg.game.action.FireballAction;
 import com.myrpg.game.action.MelleAtackAction;
 import com.myrpg.game.action.RestAction;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Natallia && Anton on 15.11.2017.
- */
 
-public class UnitFactory {
-    public enum UnitType{
+public class UnitFactory implements Serializable{
+    public enum UnitType implements Serializable{
         WARIOR, DD, WIZARD
     }
 
-    private BattleScreen battleScreen;
     private Map<UnitType, Unit> data;
     private List<Autopilot> aiBank;
     private List<BaseAction> actions;
@@ -29,8 +26,7 @@ public class UnitFactory {
         return actions;
     }
 
-    public UnitFactory(BattleScreen battleScreen) {
-        this.battleScreen = battleScreen;
+    public UnitFactory() {
         this.createActions();
         this.aiBank = new ArrayList<Autopilot>();
         this.aiBank.add(new Autopilot() {
@@ -40,9 +36,12 @@ public class UnitFactory {
                     return false;
                 }
                 Unit target = null;
+                int counter = 0;
                 do{
                     target = me.getBattleScreen().getUnits().get((int)(Math.random()*me.getBattleScreen().getUnits().size()));
-                }while (target.isAI());
+                    counter++;
+                    if(counter > 1000)break;
+                }while (me.isMyTeamMate(target) || !target.isAlive());
                 me.setTarget(target);
                 me.getActions().get(0).action(me);// только атака на врага
                 return true;
@@ -55,49 +54,83 @@ public class UnitFactory {
         this.actions.add(new MelleAtackAction());
         this.actions.add(new DefenceStanceAction());
         this.actions.add(new RestAction());
+        this.actions.add(new FireballAction());
     }
 
     public void createUnitPatterns(){
         data = new HashMap<UnitType, Unit>();
-        SkillsFactory wariorSkills = new SkillsFactory(0,1);
-        Unit warior = new Unit(Assets.getInstance().getAssetManager().get("Warrior.png", Texture.class),
-                Assets.getInstance().getAssetManager().get("WarriorDeath.png", Texture.class),
+        SkillsFactory wariorSkills = new SkillsFactory(0);
+        Unit warior = new Unit(UnitType.WARIOR, Assets.getInstance().getAtlas().findRegion("WarriorAnim"),
+                Assets.getInstance().getAtlas().findRegion("WarriorDeath"),
                 wariorSkills);
         warior.getActions().add(actions.get(0));
         warior.getActions().add(actions.get(1));
         warior.getActions().add(actions.get(2));
         data.put(UnitType.WARIOR, warior);
 
-        SkillsFactory ddSkills = new SkillsFactory(1,1);
-        Unit dd = new Unit(Assets.getInstance().getAssetManager().get("DD.png", Texture.class),
-                Assets.getInstance().getAssetManager().get("DDDeath.png", Texture.class),
+        SkillsFactory ddSkills = new SkillsFactory(1);
+        Unit dd = new Unit(UnitType.DD, Assets.getInstance().getAtlas().findRegion("DD"),
+                Assets.getInstance().getAtlas().findRegion("DDDeath"),
                 ddSkills);
         dd.getActions().add(actions.get(0));
         dd.getActions().add(actions.get(1));
         dd.getActions().add(actions.get(2));
         data.put(UnitType.DD, dd);
 
-        SkillsFactory wizardSkills = new SkillsFactory(2,1);
-        Unit wizard = new Unit(Assets.getInstance().getAssetManager().get("Wizard.png", Texture.class),
-                Assets.getInstance().getAssetManager().get("WizardDeath.png", Texture.class),
+        SkillsFactory wizardSkills = new SkillsFactory(2);
+        Unit wizard = new Unit(UnitType.WIZARD, Assets.getInstance().getAtlas().findRegion("WizardAnim"),
+                Assets.getInstance().getAtlas().findRegion("WizardDeath"),
                 wizardSkills);
-        wizard.getActions().add(actions.get(0));
+        wizard.getActions().add(actions.get(3));
         wizard.getActions().add(actions.get(1));
         wizard.getActions().add(actions.get(2));
         data.put(UnitType.WIZARD, wizard);
     }
 
-    private Unit createUnit(UnitType unitType, boolean isHuman){
+    public void reloadUnit(Unit unit){
+        Unit unitPattern = data.get(unit.getType());
+        unit.reload(unitPattern.getTexture(), unitPattern.getTextureDeath(), unitPattern.getActions());
+        if(unit.isAI()){
+            unit.setAutopilot(aiBank.get(0));
+        }
+    }
+
+    public Unit createUnit(UnitType unitType, boolean flip, boolean ai, int level){
         Unit unitPattern = data.get(unitType);
-        Unit unit = new Unit(unitPattern.getTexture(), unitPattern.getTextureDeath(), (SkillsFactory)unitPattern.getSkills().clone());
+        Unit unit = new Unit(unitType, unitPattern.getTexture(), unitPattern.getTextureDeath(), (SkillsFactory)unitPattern.getSkills().clone());
         unit.setActions(unitPattern.getActions());
-        if(!isHuman)unit.setAutopilot(aiBank.get(0));
+        if(ai)unit.setAutopilot(aiBank.get(0));
+        unit.setFlip(flip);
+        unit.setlevel(level);
         return unit;
     }
-    public void createUnitAndAddToBattle(UnitType unitType, BattleScreen battleScreen, boolean isHuman, int x, int y){
+   /* public void createUnitAndAddToBattle(UnitType unitType, BattleScreen battleScreen,Hero hero, boolean isHuman, float x, float y){
         Unit unit = createUnit(unitType, isHuman);
         unit.setToMap(battleScreen, x, y);
+        unit.setHero(hero);
+        hero.getTeam().add(unit);
         if(!isHuman)unit.setFlip(true);
         battleScreen.getUnits().add(unit);
     }
+    public List<Unit> generateUnits(int unitCountOfTeam, BattleScreen battleScreen, Hero hero){
+        for (int j = 2; j <=3 ; j++) {
+            for (int k = 0; k <=2 ; k++) {
+                    int rand = Math.round((float)Math.random()*2);
+                    if(rand == 0){
+                        createUnitAndAddToBattle(UnitType.WIZARD, battleScreen, hero, false, j, k);
+                    }
+                    if(rand == 1){
+                        createUnitAndAddToBattle(UnitType.WARIOR, battleScreen, hero, false, j, k);
+                    }
+                    if(rand == 2){
+                        createUnitAndAddToBattle(UnitType.DD, battleScreen, hero, false, j, k);
+                    }
+            }
+        }
+        units = battleScreen.getUnits();
+//        for (int i = 5 + unitCountOfTeam; i >6 ; i--) {
+//            units.remove(i);
+//        }
+        return battleScreen.getUnits();
+    }*/
 }

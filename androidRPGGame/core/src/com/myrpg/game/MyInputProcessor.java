@@ -13,19 +13,22 @@ import org.w3c.dom.css.Rect;
 
 public class MyInputProcessor implements InputProcessor {
     private Vector2 cursor;
+    private boolean isClicked;
 
     public MyInputProcessor() {
         this.cursor = new Vector2(0,0);
     }
     public boolean isTouched (){
-        return Gdx.input.isTouched();
+        return isClicked;
     }
+
     public float getX(){
         return cursor.x;
     }
     public float getY(){
         return cursor.y;
     }
+
     public boolean isTouchedInArea(Rectangle rect){
         if(!isTouched())return false;
         return rect.contains(cursor);
@@ -50,11 +53,13 @@ public class MyInputProcessor implements InputProcessor {
         cursor.set(screenX, screenY);
         //экранные координаты соотносит с viewport
         ScreenManager.getInstance().getViewport().unproject(cursor);
+        isClicked = true;
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        isClicked = false;
         return false;
     }
 
