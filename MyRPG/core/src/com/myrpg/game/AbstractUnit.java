@@ -11,9 +11,9 @@ import com.myrpg.game.effects.Effect;
 
 import java.util.ArrayList;
 
-public abstract class Person {
+public abstract class AbstractUnit {
     protected GameScreen game;
-    protected Person target;
+    protected AbstractUnit target;
     protected Texture texture;
     protected Texture textureDeath;
     protected String name;
@@ -22,12 +22,15 @@ public abstract class Person {
     protected int maxHp;
     protected HealthLine hl;
     protected BitmapFont font;
+    protected int level;
+    protected int exp;
+    protected int needExp;
+    protected int mana;
+    protected int maxMana;
     protected Label hpLabel;
     protected boolean isAlive;
     protected ArrayList<Effect> effects;
-    protected Skillz skillz;
-
-    protected int level;
+    protected SkillsFactory skillsFactory;
 
     protected Vector2 position;
     protected Rectangle rect;
@@ -40,7 +43,7 @@ public abstract class Person {
         this.attackAction = attackAction;
     }
 
-    public Person getTarget() {
+    public AbstractUnit getTarget() {
         return target;
     }
 
@@ -52,9 +55,7 @@ public abstract class Person {
         return game;
     }
 
-    public int getLevel() {
-        return level;
-    }
+    public int getLevel() { return level; }
 
     public Vector2 getPosition() { return position; }
 
@@ -66,12 +67,12 @@ public abstract class Person {
         effects.add(effect);
     }
 
-    public void setTarget(Person target) {
+    public void setTarget(AbstractUnit target) {
         this.target = target;
     }
 
-    public Person (GameScreen game, Vector2 position, Texture texture, Texture textureDeath){
-        skillz = new Skillz();
+    public AbstractUnit(GameScreen game, Vector2 position, Texture texture, Texture textureDeath){
+        skillsFactory = new SkillsFactory();
         this.isAlive=true;
         this.game = game;
         this.position = position;
@@ -81,8 +82,8 @@ public abstract class Person {
         this.effects = new ArrayList<Effect>();
     }
 
-    public Skillz getSkillz() {
-        return skillz;
+    public SkillsFactory getSkillsFactory() {
+        return skillsFactory;
     }
 
     public Texture getTexture() {
@@ -98,7 +99,11 @@ public abstract class Person {
             }
         }
     }
-
+    public void levelUp(int level){
+        this.level++;
+        skillsFactory.levelUp(level);
+        needExp =(int)(needExp*(1.2f));
+    }
     public void changeHP (int value, String couse) {
         if (hp + value > maxHp) {
             value = maxHp - hp;
@@ -222,3 +227,4 @@ class HealthLine {
         labelStyleWhite = new Label.LabelStyle(new BitmapFont(), Color.WHITE);
     }
 }
+
