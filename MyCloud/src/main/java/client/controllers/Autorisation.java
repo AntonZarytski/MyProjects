@@ -4,6 +4,7 @@ import client.objects.Connection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -16,7 +17,7 @@ import java.io.IOException;
 
 public class Autorisation {
     private Connection connection;
-    private boolean isAtorised = false;
+    private static boolean isAtorised = false;
     @FXML
     Label wrongLabel;
     @FXML
@@ -27,17 +28,19 @@ public class Autorisation {
     VBox authBox;
     private Parent fxmlReg;
     private Parent fxmlWork;
+
     private FXMLLoader fxmlLoader = new FXMLLoader();
     private Registration registration;
     private WorkWindowControll workWindow;
+
     private Stage regStage;
+   // private Stage workStage;
     private Stage mainStage;
-    private Stage workStage;
+    private static String login;
 
     @FXML
     private void initialize(){
         connection = Connection.getInstance();
-
         initLoader();
     }
 
@@ -47,10 +50,6 @@ public class Autorisation {
             fxmlReg = fxmlLoader.load();
             registration = fxmlLoader.getController();
             //в один fxmlLoader можно загрузить только один fxml файл
-            FXMLLoader fxmlLoader1 = new FXMLLoader();
-            fxmlLoader1.setLocation(getClass().getResource("../fxml/workWindow.fxml"));
-            fxmlWork = fxmlLoader1.load();
-            workWindow = fxmlLoader1.getController();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,7 +69,7 @@ public class Autorisation {
         regStage.showAndWait();
     }
     public void toWorkWindow(ActionEvent actionEvent){
-        if(workStage==null){
+/*        if(workStage==null){
             workStage = new Stage();
             workStage.setTitle("Мое облако");
             workStage.setMinWidth(480);
@@ -79,14 +78,22 @@ public class Autorisation {
             workStage.initModality(Modality.WINDOW_MODAL);
             workStage.initOwner(mainStage);
         }
-        workStage.showAndWait();
+        workStage.showAndWait();*/
+        mainStage.showAndWait();
     }
 
     public void autorisation(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+        if(loginField.getText().isEmpty() || passwordField.getText().isEmpty() ){
+            wrongLabel.setText("Введите логин/пароль");
+            return;
+        }
         String authReq = connection.sendAuth(loginField.getText(), passwordField.getText());
         if(authReq.equals("")){
+            login = loginField.getText();
             setAtorised(true);
-            toWorkWindow(actionEvent);
+            Node sourse = (Node) actionEvent.getSource();
+            Stage stage = (Stage) sourse.getScene().getWindow();
+            stage.hide();
         }else wrongLabel.setText(authReq);
 
     }
@@ -95,5 +102,13 @@ public class Autorisation {
     }
     public void setAtorised(boolean bool){
         isAtorised = bool;
+    }
+
+    public static String getLogin() {
+        return login;
+    }
+
+    public static boolean isAtorised() {
+        return isAtorised;
     }
 }

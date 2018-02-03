@@ -1,6 +1,7 @@
 package client.start;
 
 import client.controllers.Autorisation;
+import client.controllers.WorkWindowControll;
 import client.objects.Connection;
 import client.controllers.Registration;
 import javafx.application.Application;
@@ -18,20 +19,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        /*Parent root = FXMLLoader.load(getClass().getResource("../fxml/autorisation.fxml"));
-        primaryStage.setTitle("Autorisation");
-        primaryStage.setScene(new Scene(root, 300, 200));
-        primaryStage.show();*/
         FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(getClass().getResource("../fxml/autorisation.fxml"));
+        fxmlLoader.setLocation(getClass().getResource("../fxml/workWindow.fxml"));
         Parent fxmlMain = fxmlLoader.load();
-        Autorisation maiController = fxmlLoader.getController();
+        WorkWindowControll maiController = fxmlLoader.getController();
         maiController.setStage(primaryStage);
-        primaryStage.setTitle("Autorisation");
+        primaryStage.setTitle("Мое облако");
         primaryStage.setScene(new Scene(fxmlMain));
         primaryStage.show();
     }
-
 
     public static void main(String[] args) {
         launch(args);

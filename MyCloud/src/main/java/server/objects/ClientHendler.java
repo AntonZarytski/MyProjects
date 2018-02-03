@@ -32,9 +32,9 @@ public class ClientHendler {
                     out = socket.getOutputStream();
                     objOut = new ObjectOutputStream(out);
                     objIn = new ObjectInputStream(in);
-                    while (true){
-                        request = new Object();
-                        //авторизация/регистрация
+                    while (true) {
+                           request = new Object();
+                         /**авторизация/регистрация*/
                         while (true) {
                             request = objIn.readObject();
                             if (request instanceof String) {
@@ -47,6 +47,7 @@ public class ClientHendler {
                                 }
                                 if (question.startsWith("/auth")) {
                                     if(autorisation(questions))
+                                        fm.sendPath(questions[1], objOut);
                                         break;
                                 }
                                 if (question.startsWith("/checkMail")) {
@@ -58,30 +59,33 @@ public class ClientHendler {
                                 }
                             }
                         }
-                        while (true){
+                        /**Работа с файлами*/
+                        while (true) {
+                            //TODO как избавться от  SocketException: Connection reset, вроде встречался раньше с таким но не помню как починить
                             request = objIn.readObject();
                             if (request instanceof String) {
                                 String[] question = request.toString().split(" ");
-                                if (question.equals("/get")) {
-                                    System.out.println("Получена команда get");
-                                    sendMsg(files);
-                                    System.out.println("Файлы отправлены клиенту");
+                                if (question[0].equals("/getpath")) {
+                                    fm.sendPath(question[1], objOut);
                                 }
                             }
-                            if(request instanceof File){
+                            if (request instanceof File) {
                                 File requestFile = (File) request;
-                                System.out.println("Получен файл " +requestFile.getName());
-                                if(files.contains(requestFile)){
+                                System.out.println("Получен файл " + requestFile.getName());
+                                if (files.contains(requestFile)) {
                                     files.remove(requestFile);
-                                    System.out.println("Количество объектов после удаления " +files.size());
-                                }else {
+                                    System.out.println("Количество объектов после удаления " + files.size());
+                                } else {
                                     files.add(requestFile);
-                                    System.out.println("Количество объектов после добавления " +files.size());
+                                    System.out.println("Количество объектов после добавления " + files.size());
                                 }
                             }
                         }
                     }
-                } catch (ClassNotFoundException | IOException | SQLException e) {
+                } catch (ClassNotFoundException | IOException |
+                        SQLException e)
+
+                {
                     try {
                         objIn.close();
                         objOut.close();
@@ -104,10 +108,11 @@ public class ClientHendler {
         objOut.writeObject(obj);
         objOut.flush();
     }
+
     private void registration(String[] questions) throws SQLException, IOException {
         if (!db.checkLoginBusy(questions[1])) {
             if (!db.checkMailBusy(questions[3])) {
-                if(db.registration(questions[1], questions[2], questions[3])) {
+                if (db.registration(questions[1], questions[2], questions[3])) {
                     sendMsg("/regok");
                 }
             } else {
@@ -117,12 +122,12 @@ public class ClientHendler {
             sendMsg("loginBusy");
         }
     }
+
     private boolean autorisation(String[] questions) throws SQLException, IOException {
-        if(db.authorisation(questions[1], questions[2])) {
+        if (db.authorisation(questions[1], questions[2])) {
             sendMsg(true);
             return true;
-        }
-        else {
+        } else {
             sendMsg(false);
             return false;
         }

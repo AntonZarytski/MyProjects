@@ -8,6 +8,7 @@ import java.net.Socket;
 public class Connection implements Communicable {
     private final static int PORT = 8189;
     private final static String HOST = "localhost";
+    private static String userName;
     private static Connection ourInstance = new Connection();
     private static Socket client;
     private static InputStream in;
@@ -19,7 +20,7 @@ public class Connection implements Communicable {
         return ourInstance;
     }
 
- /*   private Connection() {
+    private Connection() {
         try
         {
             client = new Socket(HOST, PORT);
@@ -28,7 +29,7 @@ public class Connection implements Communicable {
             objIn = new ObjectInputStream(in);
             objOut = new ObjectOutputStream(out);
 
-      *//*      Thread tr = new Thread(new Runnable() {
+      /*      Thread tr = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (true){
@@ -37,19 +38,21 @@ public class Connection implements Communicable {
                 }
             });
             tr.setDaemon(true);
-            tr.start();*//*
+            tr.start();*/
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }*/
+    }
     @Override
     public String sendAuth(String login, String password) throws IOException, ClassNotFoundException {
         String outMsg = "/auth "+ login + " " + password;
         sendMsg(outMsg);
         Object request = objIn.readObject();
         if (request instanceof Boolean){
-            if ( (Boolean) request)
+            if ( (Boolean) request) {
+                userName = login;
                 return "";
+            }
             else return "не верный логин/пароль";
         }return "что то не так, ошибка";
     }
@@ -96,5 +99,14 @@ public class Connection implements Communicable {
     private void sendMsg(Object obj) throws IOException {
         objOut.writeObject(obj);
         objOut.flush();
+    }
+
+    public void getPath() throws IOException {
+        objOut.writeObject("/getpath " + userName);
+        objOut.flush();
+    }
+
+    public static ObjectInputStream getObjIn() {
+        return objIn;
     }
 }

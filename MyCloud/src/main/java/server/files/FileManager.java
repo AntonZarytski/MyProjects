@@ -8,20 +8,26 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.Vector;
+
 
 public class FileManager implements fileWorkAbility {
     private final String rootPath = "../cloud/";
-    private File file = new File(rootPath);
-    private List<File> files = new Vector<>();
+    private File file;
     private FileMessage fm;
 
     @Override
     public void createFolder(String folderName) {
         File file = new File(rootPath + folderName + "/");
-        files.add(file);
+        file.mkdirs();
+    }
+
+    @Override
+    public void sendPath(String name, ObjectOutputStream oos) throws IOException {
+        /**name - имя пользователя формирующее путь на сервере rootPath/userName/*/
+        file = new File(rootPath + name + "/");
+        File[] file = this.file.listFiles();
+        oos.writeObject(file);
+        oos.flush();
     }
 
     @Override
@@ -38,10 +44,17 @@ public class FileManager implements fileWorkAbility {
     public void pasteFile(File file) {
 
     }
-
     @Override
-    public void deliteFile(String fileName) {
-
+    public void deleteFile(File file) {
+        if (!file.exists())
+            return;
+        if (file.isDirectory()) {
+            for (File f : file.listFiles())
+                deleteFile(f);
+            file.delete();
+        } else {
+            file.delete();
+        }
     }
 
     @Override
@@ -54,7 +67,7 @@ public class FileManager implements fileWorkAbility {
     @Override
     public void getFile(String filePath, ObjectInputStream ois) throws IOException, ClassNotFoundException {
         fm = (FileMessage) ois.readObject();
-        Files.write(Paths.get(files.get(1).getPath() + fm.getName()), fm.getData(), StandardOpenOption.CREATE);
+        //TODO доделать принятие файла
 
     }
 

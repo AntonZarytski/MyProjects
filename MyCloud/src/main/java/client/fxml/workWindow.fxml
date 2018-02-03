@@ -12,8 +12,26 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <ListView fx:id="mainViewList" prefHeight="680.0" prefWidth="480.0" />
+                        <ListView fx:id="mainViewList" layoutY="33.0" prefHeight="647.0" prefWidth="480.0" />
                         <ScrollBar layoutX="455.0" layoutY="4.0" orientation="VERTICAL" prefHeight="671.0" prefWidth="22.0" />
+                        <Button fx:id="refreshBtn" layoutX="338.0" layoutY="622.0" mnemonicParsing="false" onAction="#refreshFiles" text="Обновить" AnchorPane.bottomAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="600.0" />
+                        <Label layoutX="14.0" layoutY="1.0" onMouseClicked="#directoryUp" prefHeight="27.0" prefWidth="51.0" text="/ . . ." />
+                        <MenuBar layoutX="71.0" layoutY="-5.0" prefHeight="12.0" prefWidth="383.0">
+                          <menus>
+                            <Menu mnemonicParsing="false" text="Файл">
+                              <items>
+                                    <MenuItem mnemonicParsing="false" onAction="#downloadOnDisk" text="Загрузить на диск" />
+                                    <MenuItem mnemonicParsing="false" onAction="#downloadToComp" text="Скачать" />
+                                    <MenuItem mnemonicParsing="false" onAction="#renameFile" text="Переименовать" />
+                                    <MenuItem mnemonicParsing="false" onAction="#copyFile" text="Копировать" />
+                                    <MenuItem mnemonicParsing="false" onAction="#cutFile" text="Вырезать" />
+                                    <MenuItem mnemonicParsing="false" onAction="#pasteFile" text="Вставить" />
+                                    <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Удалить" />
+                                <MenuItem mnemonicParsing="false" onAction="#createFolder" text="Создать папку" />
+                              </items>
+                            </Menu>
+                          </menus>
+                        </MenuBar>
                      </children>
                   </AnchorPane>
             </content>
