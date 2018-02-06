@@ -1,0 +1,9 @@
+
+Dsquid:S1068"(Remove this unused "HOST" private field.(ƒÈèç8òßßß’,
+Isquid:S1068"(Remove this unused "PORT" private field.(İÌáÁúÿÿÿÿ8òßßß’,
+‰"squid:ClassVariableVisibilityCheck"VMake connection a static final constant or non-public and provide accessors if needed.(ıØÕá8òßßß’,
+Dsquid:S1068"(Remove this unused "auth" private field.(ÒøÀ8òßßß’,
+osquid:ModifiersOrderCheck"EReorder the modifiers to comply with the Java Language Specification.(ƒÈèç8òßßß’,
+tsquid:ModifiersOrderCheck"EReorder the modifiers to comply with the Java Language Specification.(İÌáÁúÿÿÿÿ8òßßß’,
+Hsquid:S1068"'Remove this unused "reg" private field.(åüêÑşÿÿÿÿ8òßßß’,
+Lsquid:S1444"0Make this "public static connection" field final(ıØÕá8òßßß’,

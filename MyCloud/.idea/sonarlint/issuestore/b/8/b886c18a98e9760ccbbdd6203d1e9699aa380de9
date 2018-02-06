@@ -1,0 +1,12 @@
+
+|squid:S1450"[Remove the "registration" field and declare it as a local variable in the relevant methods.(›‡Ôñüÿÿÿÿ8óßßß’,
+Nsquid:S1172"2Remove this unused method parameter "actionEvent".(ÊöŠ8óßßß’,
+lsquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(ã¢î¿úÿÿÿÿ8óßßß’,
+Qsquid:S1068"0Remove this unused "registration" private field.(›‡Ôñüÿÿÿÿ8óßßß’,
+Hsquid:S1068",Remove this unused "fxmlWork" private field.(¶–Æü8óßßß’,
+zsquid:S1450"YRemove the "isAtorised" field and declare it as a local variable in the relevant methods.(ÆÜ°¦şÿÿÿÿ8óßßß’,
+Osquid:S1068".Remove this unused "isAtorised" private field.(ÆÜ°¦şÿÿÿÿ8óßßß’,
+lsquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(©ú¿ıÿÿÿÿ8óßßß’,
+Dsquid:S1148"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿ8óßßß’,
+Nsquid:S1172"2Remove this unused method parameter "actionEvent".(ıÓÔ¡8óßßß’,
+Osquid:S1068".Remove this unused "workWindow" private field.(Ú¼šùÿÿÿÿ8óßßß’,

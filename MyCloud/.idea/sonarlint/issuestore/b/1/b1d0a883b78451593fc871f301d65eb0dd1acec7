@@ -1,0 +1,25 @@
+
+9squid:S3010"Remove this assignment of "db".( “ÛÉüÿÿÿÿ
+tsquid:S2159"ZRemove this call to "equals"; comparisons between an array and a type always return false.(òí¤¥ÿÿÿÿÿ
+r
+squid:S135"YReduce the total number of break and continue statements in this loop to use at most one.(˜ïˆžÿÿÿÿÿ
+M
+squid:S106"9Replace this use of System.out or System.err by a logger.(õ“ôâ
+gsquid:S3776"RRefactor this method to reduce its Cognitive Complexity from 62 to the 15 allowed.(‚ÔçÅ
+<squid:S2189""Add an end condition to this loop.(˜ïˆžÿÿÿÿÿ
+Dsquid:S1066"/Merge this if statement with the enclosing one.(èì³í
+Dsquid:S1068"*Remove this unused "socket" private field.(Å’¬Úþÿÿÿÿ
+Bsquid:S1068"(Remove this unused "user" private field.(’Ø¾ýÿÿÿÿ
+`squid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(þ€æÞ
+M
+squid:S106"9Replace this use of System.out or System.err by a logger.(‚ËÙ©
+=squid:S1148"#Use a logger to log this exception.(€ÉÔ…ýÿÿÿÿ
+?squid:S1068"*Remove this unused "isAuth" private field.(¢¸‰ê
+M
+squid:S106"9Replace this use of System.out or System.err by a logger.(êùô½
+M
+squid:S106"9Replace this use of System.out or System.err by a logger.(“ªõ
+R
+squid:S106"9Replace this use of System.out or System.err by a logger.(äþˆÖùÿÿÿÿ
+=squid:S1148"#Use a logger to log this exception.(Âþÿâûÿÿÿÿ
+Bsquid:S1604"(Make this anonymous inner class a lambda(Âõí­ùÿÿÿÿ

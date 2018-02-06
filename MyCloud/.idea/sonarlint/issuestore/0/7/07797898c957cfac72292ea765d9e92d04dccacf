@@ -1,0 +1,14 @@
+
+esquid:CommentedOutCodeLine"<This block of commented-out lines of code should be removed.(¯ˆÕùÿÿÿÿÿ
+=squid:S1148"#Use a logger to log this exception.(€ÉÔ…ýÿÿÿÿ
+<squid:S3010""Remove this assignment of "objIn".(ó¬÷Œþÿÿÿÿ
+8squid:S3010"#Remove this assignment of "client".(ðÝÒð
+:squid:S3010" Remove this assignment of "out".(Ö‚—äøÿÿÿÿ
+9squid:S3010"Remove this assignment of "in".(óµÿ¡üÿÿÿÿ
+R
+squid:S106"9Replace this use of System.out or System.err by a logger.(õÓãüÿÿÿÿ
+R
+squid:S106"9Replace this use of System.out or System.err by a logger.(¡á‹”ýÿÿÿÿ
+hsquid:ModifiersOrderCheck"EReorder the modifiers to comply with the Java Language Specification.(ƒÈèç
+8squid:S3010"#Remove this assignment of "objOut".(ìƒÞ½
+msquid:ModifiersOrderCheck"EReorder the modifiers to comply with the Java Language Specification.(ÝÌáÁúÿÿÿÿ

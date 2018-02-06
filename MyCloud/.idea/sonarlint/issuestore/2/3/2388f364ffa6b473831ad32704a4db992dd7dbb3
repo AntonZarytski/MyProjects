@@ -1,0 +1,10 @@
+
+¢squid:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(¯€¥ëúÿÿÿÿ8óßßß’,
+dsquid:HiddenFieldCheck"8Rename "file" which hides the field declared at line 17.(È¥ûÿÿÿÿÿ8óßßß’,
+¢squid:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(áÙ¨ôùÿÿÿÿ8óßßß’,
+Gsquid:S1075"&Remove this hard-coded path-delimiter.(È¥ûÿÿÿÿÿ8óßßß’,
+†squid:S1149"eReplace the synchronized class "Vector" by an unsynchronized one such as "ArrayList" or "LinkedList".(´´Š¿øÿÿÿÿ8óßßß’,
+¢squid:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(äçñÎøÿÿÿÿ8óßßß’,
+¢squid:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(“¨Ùşÿÿÿÿ8óßßß’,
+¢squid:S1186"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(ï²Ëûÿÿÿÿ8óßßß’,
+=squid:S1170"!Make this final field static too.(ÕÇú8óßßß’,
