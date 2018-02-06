@@ -4,6 +4,7 @@ import client.Interfaces.Communicable;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Queue;
 
 public class Connection implements Communicable {
     private final static int PORT = 8189;
@@ -105,8 +106,15 @@ public class Connection implements Communicable {
         objOut.writeObject("/getpath " + userName);
         objOut.flush();
     }
-
+    public void sendCommands(Queue queue) throws IOException {
+        objOut.writeObject(queue);
+        objOut.flush();
+    }
     public static ObjectInputStream getObjIn() {
         return objIn;
+    }
+
+    public static ObjectOutputStream getObjOut() {
+        return objOut;
     }
 }

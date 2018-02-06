@@ -4,10 +4,10 @@ import server.interfaces.fileWorkAbility;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 
 public class FileManager implements fileWorkAbility {
@@ -59,14 +59,16 @@ public class FileManager implements fileWorkAbility {
 
     @Override
     public void sendFile(String fileName, ObjectOutputStream oos) throws IOException {
-        fm = new FileMessage(fileName, Files.readAllBytes(Paths.get(fileName)));
+       // fm = new FileMessage(fileName, Files.readAllBytes(Paths.get(fileName)));
         oos.writeObject(fm);
         oos.flush();
     }
 
     @Override
-    public void getFile(String filePath, ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        fm = (FileMessage) ois.readObject();
+    public void getFile(FileMessage fm) throws IOException {
+        System.out.println("получен файл по имени " + fm.getName() + " сохранен " + fm.getPath());
+        Files.write(Paths.get(fm.getPath()), fm.getData(), StandardOpenOption.CREATE);
+        System.out.println("получен файл по имени " + fm.getName() + " сохранен " + fm.getPath());
         //TODO доделать принятие файла
 
     }

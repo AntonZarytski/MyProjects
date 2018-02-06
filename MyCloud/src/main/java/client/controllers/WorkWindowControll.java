@@ -3,7 +3,6 @@ package client.controllers;
 import client.files.FileManager;
 import client.objects.Connection;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -14,14 +13,20 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.List;
 
 public class WorkWindowControll {
@@ -35,14 +40,12 @@ public class WorkWindowControll {
     public Label photoMbLabel;
     public Label otherMbLabel;
     public ListView delitedViewList;
-    public ListView<File> mainViewList;
-    public List<String> commandsList;
+    public ListView<Path> mainViewList;
+    public Queue<String> commandsList;
     public Button refreshBtn;
-    //TODO как реализовать отображение не путей файлов а имена, но что бы сохранить возможность работать как с классом File
-    //TODO можно ли работать с листом файлов передавать его на сервер и что бы сервер в свою очередь осуществлял изменение файлов(тип как пакетный запрос
-    //TODO и тогда в каком случае необходимо отсылать лист на сервер)
-    private List<File> fileList;
-    private ObservableList<File> files;
+    private List<Path> pathList;
+    private List<String> stringList;
+    private ObservableList<Path> paths;
     private Connection connection;
     private FileManager fm;
     private Stage mainStage;
@@ -50,42 +53,75 @@ public class WorkWindowControll {
     private Stage authStage;
     private Autorisation authWindow;
     private final String login = Autorisation.getLogin();
+    private Path root;
 
     @FXML
-    private void initialize(){
+    private void initialize() {
         connection = Connection.getInstance();
         fm = new FileManager();
-        commandsList = new ArrayList<>();
-        fileList = fm.getFiles();
-        files = FXCollections.observableArrayList(fileList);
-        mainViewList.setItems(files);
+        commandsList = new PriorityQueue<>();
+        //stringList = convertToString(pathList);
+        pathList = fm.getPaths();
+        paths = FXCollections.observableArrayList(pathList);
+        ;
+        mainViewList.setItems(paths);
         initLoader();
         toAutorise();
-        files.addListener(new ListChangeListener<File>() {
-            @Override
-            public void onChanged(Change<? extends File> c) {
 
-            }
-        });
         mainViewList.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if(event.getClickCount()==2) {
-                    File file = mainViewList.getSelectionModel().getSelectedItem();
-                    if (file.isDirectory()) {
-                        refreshFiles(file);
+                if (event.getClickCount() == 2) {
+                    File path = mainViewList.getSelectionModel().getSelectedItem().toFile();
+                    if (path.isDirectory()) {
+                        root = mainViewList.getSelectionModel().getSelectedItem();
+                    }
+                    if (path.isDirectory()) {
+                        refreshFiles(path);
                     }
                 }
             }
         });
+        mainViewList.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                if (event.getGestureSource() != mainViewList && event.getDragboard().hasFiles()) {
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                }
+                event.consume();
+            }
+        });
+        mainViewList.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                try {
+                    Dragboard db = event.getDragboard();
+                    boolean success = false;
+                    if (db.hasFiles()) {
+                        fm.sendFile(root.toString(), db.getFiles().get(0).getAbsolutePath(), Connection.getObjOut());
+                        success = true;
+                    }
+                    event.setDropCompleted(success);
+                    event.consume();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
     }
 
-    private void refreshFileList(){
-        files.clear();
-        files.addAll(fm.getFiles());
+    private List<String> convertToString(List<Path> list) {
+        List<String> stringList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            stringList.add(list.get(i).toString());
+        }
+        return stringList;
     }
-    private void toAutorise(){
-        if(authStage==null){
+
+    private void toAutorise() {
+        if (authStage == null) {
             authStage = new Stage();
             authStage.setTitle("Авторизация");
             authStage.setMinWidth(200);
@@ -110,64 +146,99 @@ public class WorkWindowControll {
         }
     }
 
-    public void setStage(Stage stage){
+    public void setStage(Stage stage) {
         this.mainStage = stage;
     }
 
     public void refreshFiles(ActionEvent actionEvent) {
-            try {
-                connection.getPath();
-                mainViewList.setItems(files);
-                fm.getFiles().clear();
-                fm.refreshPath(Connection.getObjIn());
-                refreshFileList();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+        try {
+            connection.getPath();
+            mainViewList.setItems(paths);
+            fm.getPaths().clear();
+            fm.refreshPath(Connection.getObjIn());
+            refreshFileList();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshFileList() {
+        paths.clear();
+        paths.addAll(fm.getPaths());
     }
 
     public void directoryUp(MouseEvent mouseEvent) {
-        if(mouseEvent.getClickCount()==2) {
-            File file = files.get(0);
-            String path = file.toPath().getParent().getParent().toString();
+        if (mouseEvent.getClickCount() == 2) {
+            Path file = root;
+            String path = file.getParent().toString();
+            root = Paths.get(path);
             //TODO дырка, как сделать что бы выше каталога-логина нельзя было поднятся?
             String crutch = "..\\cloud";
-            if(!path.equals(crutch)){
-                file = new File(path);
-                refreshFiles(file);
+            if (!path.equals(crutch)) {
+                file = Paths.get(path);
+                refreshFiles(file.toFile());
             }
         }
     }
-    private void refreshFiles(File file){
-        files.clear();
-        files.addAll(file.listFiles());
+
+    private void refreshFiles(File file) {
+        paths.clear();
+        File[] files = file.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            paths.add(files[i].toPath());
+        }
     }
 
     //TODO нужен ли класс FileManager или можно повесить на контроллер реализацию fileWorkAbility
 
-    public void downloadOnDisk(ActionEvent actionEvent) {
+    public void downloadOnDisk(ActionEvent actionEvent) throws IOException {
+        Desktop desktop = Desktop.getDesktop();
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(mainStage);
+        System.out.println("файл отправки " + file.toString());
+        System.out.println("путь отправки " + root.toString());
+        fm.sendFile(root.toString(), file.toString(), Connection.getObjOut());
+        /*if (file != null) {
+            //desktop.open(file);
+            List<File> files = Arrays.asList(file);
+
+            for (int i = 0; i <files.size() ; i++) {
+                fm.sendFile(root.toString(), files.get(i).toString(), Connection.getObjOut());
+            }
+        }*/
     }
 
     public void downloadToComp(ActionEvent actionEvent) {
     }
 
     public void renameFile(ActionEvent actionEvent) {
+        File file = mainViewList.getSelectionModel().getSelectedItem().toFile();
+
     }
 
     public void copyFile(ActionEvent actionEvent) {
     }
 
     public void cutFile(ActionEvent actionEvent) {
+
     }
 
     public void pasteFile(ActionEvent actionEvent) {
+
     }
 
-    public void deleteFile(ActionEvent actionEvent) {
-        File file = mainViewList.getSelectionModel().getSelectedItem();
-        fm.deleteFile(file);
+    public void deleteFile(ActionEvent actionEvent) throws IOException {
+        File file = mainViewList.getSelectionModel().getSelectedItem().toFile();
+        String command = "/delete" + " " + file.toString();
+        commandsList.add(command);
+        paths.remove(file.toPath());
+        connection.sendCommands(commandsList);
+
     }
 
     public void createFolder(ActionEvent actionEvent) {
+        File file = root.toFile();
+        String command = "/createfolder" + " " + file.toString();
+
     }
 }

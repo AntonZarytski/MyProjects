@@ -1,5 +1,7 @@
 package server.interfaces;
 
+import server.files.FileMessage;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,5 +15,5 @@ public interface fileWorkAbility {
     void pasteFile(File file);
     void deleteFile(File File);
     void sendFile(String fileName, ObjectOutputStream oos) throws IOException;
-    void getFile(String filePath, ObjectInputStream ois) throws IOException, ClassNotFoundException;
+    void getFile(FileMessage fileMessage) throws IOException;
 }

@@ -1,11 +1,14 @@
 package server.objects;
 
 import server.files.FileManager;
+import server.files.FileMessage;
 
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class ClientHendler {
     private Socket socket;
@@ -69,6 +72,22 @@ public class ClientHendler {
                                     fm.sendPath(question[1], objOut);
                                 }
                             }
+                            if (request instanceof Queue){
+                                Queue<String> queue = (PriorityQueue<String>) request;
+                                while (!queue.isEmpty()){
+                                    String command = queue.poll();
+                                    String[] commands = command.split(" ");
+                                    if (commands[0].startsWith("/delete")){
+                                        fm.deleteFile(new File(commands[1]));
+                                    }/*else if (commands[0].startsWith("/getfile")){
+                                        request = objIn.readObject();
+                                        if (request instanceof FileMessage)
+                                        fm.getFile((FileMessage) request);
+                                    }*/
+                                }
+                            }
+                            if (request instanceof FileMessage)
+                                fm.getFile((FileMessage) request);
                             if (request instanceof File) {
                                 File requestFile = (File) request;
                                 System.out.println("Получен файл " + requestFile.getName());

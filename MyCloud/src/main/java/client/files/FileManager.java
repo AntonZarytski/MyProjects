@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -20,9 +20,11 @@ public class FileManager implements fileWorkAbility {
     private File file = new File(rootPath);
     private FileMessage fm;
     private List<File> files;
+    private List<Path> paths;
 
     public FileManager() {
         this.files = new ArrayList<>();
+        this.paths = new ArrayList<>();
     }
 
     @Override
@@ -47,6 +49,7 @@ public class FileManager implements fileWorkAbility {
 
     @Override
     public void deleteFile(File file) {
+        //TODO отпилить
         if (!file.exists())
             return;
         if (file.isDirectory()) {
@@ -60,15 +63,17 @@ public class FileManager implements fileWorkAbility {
 
 
     @Override
-    public void sendFile(String fileName, ObjectOutputStream oos) throws IOException {
-        fm = new FileMessage(fileName, Files.readAllBytes(Paths.get(fileName)));
+    public void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException {
+        this.fm = new FileMessage(path, fileName, Files.readAllBytes(Paths.get(fileName)));
+        System.out.println("отправлен файл по имени " + fm.getName() + " по пути " + fm.getPath());
+        System.out.println("отправлен файл по имени " + fm.getName() + " по пути " + fm.getPath());
         oos.writeObject(fm);
         oos.flush();
     }
 
     @Override
     public void getFile(String filePath, ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        fm = (FileMessage) ois.readObject();
+        this.fm = (FileMessage) ois.readObject();
         //TODO было files.get(1).getPath()
         Files.write(Paths.get(files.get(1) + fm.getName()), fm.getData(), StandardOpenOption.CREATE);
 
@@ -76,11 +81,14 @@ public class FileManager implements fileWorkAbility {
 
     public void refreshPath(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         File[] pathes = (File[]) ois.readObject();
-        files.addAll(Arrays.asList(pathes));
-    }
+        paths.clear();
+        for (int i = 0; i <pathes.length ; i++) {
+            paths.add(pathes[i].toPath());
+        }
 
-    public List<File> getFiles() {
-        return files;
+    }
+    public List<Path> getPaths() {
+        return paths;
     }
 
     public void refreshFiles() {
