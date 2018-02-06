@@ -58,8 +58,9 @@ public class FileManager implements fileWorkAbility {
     }
 
     @Override
-    public void sendFile(String fileName, ObjectOutputStream oos) throws IOException {
-       // fm = new FileMessage(fileName, Files.readAllBytes(Paths.get(fileName)));
+    public void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException {
+        fm = new FileMessage(path, fileName, Files.readAllBytes(Paths.get(fileName)));
+        System.out.println("отправлен файл по имени " + fm.getName() + " по пути " + fm.getPath());
         oos.writeObject(fm);
         oos.flush();
     }
@@ -68,9 +69,6 @@ public class FileManager implements fileWorkAbility {
     public void getFile(FileMessage fm) throws IOException {
         System.out.println("получен файл по имени " + fm.getName() + " сохранен " + fm.getPath());
         Files.write(Paths.get(fm.getPath()), fm.getData(), StandardOpenOption.CREATE);
-        System.out.println("получен файл по имени " + fm.getName() + " сохранен " + fm.getPath());
-        //TODO доделать принятие файла
-
     }
 
     public void refreshPath(File file) {

@@ -98,6 +98,7 @@ public class WorkWindowControll {
                     Dragboard db = event.getDragboard();
                     boolean success = false;
                     if (db.hasFiles()) {
+                        System.out.println(db.getFiles().get(0).getAbsolutePath());
                         fm.sendFile(root.toString(), db.getFiles().get(0).getAbsolutePath(), Connection.getObjOut());
                         success = true;
                     }
@@ -192,23 +193,25 @@ public class WorkWindowControll {
     //TODO нужен ли класс FileManager или можно повесить на контроллер реализацию fileWorkAbility
 
     public void downloadOnDisk(ActionEvent actionEvent) throws IOException {
-        Desktop desktop = Desktop.getDesktop();
-        FileChooser fileChooser = new FileChooser();
-        File file = fileChooser.showOpenDialog(mainStage);
+        File file = chooseFile();
         System.out.println("файл отправки " + file.toString());
         System.out.println("путь отправки " + root.toString());
         fm.sendFile(root.toString(), file.toString(), Connection.getObjOut());
-        /*if (file != null) {
-            //desktop.open(file);
-            List<File> files = Arrays.asList(file);
-
-            for (int i = 0; i <files.size() ; i++) {
-                fm.sendFile(root.toString(), files.get(i).toString(), Connection.getObjOut());
-            }
-        }*/
+    }
+    private File chooseFile(){
+        Desktop desktop = Desktop.getDesktop();
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(mainStage);
+        return file;
     }
 
-    public void downloadToComp(ActionEvent actionEvent) {
+    public void downloadToComp(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+        File path = chooseFile();
+        File file = mainViewList.getSelectionModel().getSelectedItem().toFile();
+        String command = "/getfile " + file.toString();
+        commandsList.add(command);
+        connection.sendCommands(commandsList);
+        fm.getFile(path.toString(), Connection.getObjIn());
     }
 
     public void renameFile(ActionEvent actionEvent) {

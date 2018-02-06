@@ -14,6 +14,6 @@ public interface fileWorkAbility {
     void copyFile(File file);
     void pasteFile(File file);
     void deleteFile(File File);
-    void sendFile(String fileName, ObjectOutputStream oos) throws IOException;
+    void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException;
     void getFile(FileMessage fileMessage) throws IOException;
 }

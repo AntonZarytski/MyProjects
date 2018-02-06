@@ -5,8 +5,8 @@ import java.io.Serializable;
 public class FileMessage implements Serializable {
     private final static long serialVersionUID = 6549841687984189L;
     private String name;
-    private String path;
     private byte[] data;
+    private String path;
 
     public String getName() {
         return name;
@@ -21,8 +21,8 @@ public class FileMessage implements Serializable {
     }
 
     public FileMessage(String path, String name, byte[] data) {
-        this.name = name;
         this.path = path;
+        this.name = name;
         this.data = data;
     }
 }

@@ -64,8 +64,7 @@ public class FileManager implements fileWorkAbility {
 
     @Override
     public void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException {
-        this.fm = new FileMessage(path, fileName, Files.readAllBytes(Paths.get(fileName)));
-        System.out.println("отправлен файл по имени " + fm.getName() + " по пути " + fm.getPath());
+        fm = new FileMessage(path, fileName, Files.readAllBytes(Paths.get(fileName)));
         System.out.println("отправлен файл по имени " + fm.getName() + " по пути " + fm.getPath());
         oos.writeObject(fm);
         oos.flush();
@@ -73,10 +72,9 @@ public class FileManager implements fileWorkAbility {
 
     @Override
     public void getFile(String filePath, ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        this.fm = (FileMessage) ois.readObject();
-        //TODO было files.get(1).getPath()
-        Files.write(Paths.get(files.get(1) + fm.getName()), fm.getData(), StandardOpenOption.CREATE);
-
+        fm = (FileMessage) ois.readObject();
+        System.out.println("получен файл по имени " + fm.getName() + " сохранен " + fm.getPath());
+        Files.write(Paths.get(fm.getPath()), fm.getData(), StandardOpenOption.CREATE);
     }
 
     public void refreshPath(ObjectInputStream ois) throws IOException, ClassNotFoundException {
