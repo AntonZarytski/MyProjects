@@ -1,6 +1,6 @@
 package server;
 
-import server.objects.Server;
+import server.model.Server;
 
 public class Main {
     public static void main(String[] args) {

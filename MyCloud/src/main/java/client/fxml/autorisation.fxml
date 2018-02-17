@@ -8,20 +8,28 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox fx:id="authBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.Autorisation">
-   <children>
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-         <children>
-            <Text layoutX="78.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Авторизация" AnchorPane.bottomAnchor="154.078125" AnchorPane.leftAnchor="78.0" AnchorPane.rightAnchor="78.0">
-               <font>
-                  <Font size="24.0" />
-               </font>
-            </Text>
-            <TextField fx:id="loginField" alignment="CENTER" layoutX="38.0" layoutY="49.0" promptText="Логин" AnchorPane.bottomAnchor="110.0" AnchorPane.leftAnchor="38.0" AnchorPane.rightAnchor="38.0" />
-            <TextField fx:id="passwordField" alignment="CENTER" layoutX="38.0" layoutY="100.0" onAction="#autorisation" promptText="Пароль" AnchorPane.bottomAnchor="61.0" AnchorPane.leftAnchor="38.0" AnchorPane.rightAnchor="38.0" />
-            <Hyperlink layoutX="59.0" layoutY="157.0" onAction="#toRegistration" text="Новый пользователь?" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="59.0" AnchorPane.rightAnchor="47.0" />
-            <Label fx:id="wrongLabel" layoutX="57.0" layoutY="139.0" prefHeight="9.0" prefWidth="194.0" text=" " textFill="RED" />
-         </children>
-      </AnchorPane>
-   </children>
+<VBox fx:id="authBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="client.controllers.Autorisation">
+    <children>
+        <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+            <children>
+                <Text layoutX="78.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Авторизация"
+                      AnchorPane.bottomAnchor="154.078125" AnchorPane.leftAnchor="78.0" AnchorPane.rightAnchor="78.0">
+                    <font>
+                        <Font size="24.0"/>
+                    </font>
+                </Text>
+                <TextField fx:id="loginField" alignment="CENTER" layoutX="38.0" layoutY="49.0" promptText="Логин"
+                           AnchorPane.bottomAnchor="110.0" AnchorPane.leftAnchor="38.0" AnchorPane.rightAnchor="38.0"/>
+                <TextField fx:id="passwordField" alignment="CENTER" layoutX="38.0" layoutY="100.0"
+                           onAction="#autorisation" promptText="Пароль" AnchorPane.bottomAnchor="61.0"
+                           AnchorPane.leftAnchor="38.0" AnchorPane.rightAnchor="38.0"/>
+                <Hyperlink layoutX="59.0" layoutY="157.0" onAction="#toRegistration" text="Новый пользователь?"
+                           AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="59.0" AnchorPane.rightAnchor="47.0"/>
+                <Label fx:id="wrongLabel" layoutX="57.0" layoutY="139.0" prefHeight="9.0" prefWidth="194.0" text=" "
+                       textFill="RED"/>
+            </children>
+        </AnchorPane>
+    </children>
 </VBox>

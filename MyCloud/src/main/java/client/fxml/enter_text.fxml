@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane prefHeight="100.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="client.controllers.EnterText">
+    <children>
+        <TextField fx:id="newName" layoutX="13.0" layoutY="14.0" onAction="#ok" text="Введите имя"
+                   AnchorPane.leftAnchor="13.0" AnchorPane.rightAnchor="13.0"/>
+        <Button layoutX="149.0" layoutY="53.0" mnemonicParsing="false" onAction="#ok" prefHeight="39.0" prefWidth="87.0"
+                text="OK"/>
+        <Button layoutX="14.0" layoutY="53.0" mnemonicParsing="false" onAction="#cancel" text="Отмена"/>
+    </children>
+</AnchorPane>

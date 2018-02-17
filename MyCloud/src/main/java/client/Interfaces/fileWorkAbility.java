@@ -7,10 +7,16 @@ import java.io.ObjectOutputStream;
 
 public interface fileWorkAbility {
     void createFolder(String name);
-    void renameFile(File file);
+
+    void renameFile(String oldName, String newName);
+
     void copyFile(File file);
+
     void pasteFile(File file);
+
     void deleteFile(File file);
+
     void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException;
-    void getFile(String filePath, ObjectInputStream ois) throws IOException, ClassNotFoundException;
+
+    void getFile(String fileSavePath, String fileServerPath, ObjectInputStream ois) throws IOException, ClassNotFoundException;
 }

@@ -1,7 +1,6 @@
-package server.objects;
+package server.model;
 
-import server.files.FileManager;
-import server.files.FileMessage;
+import client.model.FileMessage;
 
 import java.io.*;
 import java.net.Socket;
@@ -11,6 +10,20 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class ClientHendler {
+    public static final String REG_COMAND = "/reg";
+    public static final String AUTH_COMAND = "/auth";
+    public static final String CHECK_MAIL_COMAND = "/checkMail";
+    public static final String CHECK_LOGIN_COMAND = "/checkLogin";
+    public static final String GETPATH_COMAND = "/getpath";
+    public static final String DELETE_COMAND = "/delete";
+    public static final String GETFILE_COMAND = "/getfile";
+    public static final String CREATEFOLDER_COMAND = "/createfolder";
+    public static final String RENAME_COMAND = "/rename";
+    public static final String REGOK = "/regok";
+    public static final String MAIL_BUSY = "mailBusy";
+    public static final String LOGIN_BUSY = "loginBusy";
+    public static final String OK_COMMAND = "/ok ";
+    public static final String FALSE_COMMAND = "/false";
     private Socket socket;
     private InputStream in;
     private OutputStream out;
@@ -18,9 +31,6 @@ public class ClientHendler {
     private ObjectInputStream objIn;
     private Object request;
     private FileManager fm;
-    private List<File> files;
-    private boolean isAuth = false;
-    private User user;
     private static DB db;
 
     public ClientHendler(Socket socket) {
@@ -43,21 +53,22 @@ public class ClientHendler {
                             if (request instanceof String) {
                                 String question = request.toString();
                                 String[] questions = question.split(" ");
-                                if (question.startsWith("/reg")) {
+                                if (question.startsWith(REG_COMAND)) {
                                     registration(questions);
-                                    fm.createFolder(questions[1]);
+                                    String newFolder = db.getRootFolderName(questions[1], questions[2]);
+                                    System.out.println(newFolder);
+                                    fm.createFolder("../cloud/"+newFolder);
                                     continue;
                                 }
-                                if (question.startsWith("/auth")) {
+                                if (question.startsWith(AUTH_COMAND)) {
                                     if(autorisation(questions))
-                                        fm.sendPath(questions[1], objOut);
                                         break;
                                 }
-                                if (question.startsWith("/checkMail")) {
+                                if (question.startsWith(CHECK_MAIL_COMAND)) {
                                     sendMsg(db.checkMailBusy(questions[1]));
                                     continue;
                                 }
-                                if (question.startsWith("/checkLogin")) {
+                                if (question.startsWith(CHECK_LOGIN_COMAND)) {
                                     sendMsg(db.checkLoginBusy(questions[1]));
                                 }
                             }
@@ -68,7 +79,7 @@ public class ClientHendler {
                             request = objIn.readObject();
                             if (request instanceof String) {
                                 String[] question = request.toString().split(" ");
-                                if (question[0].equals("/getpath")) {
+                                if (question[0].equals(GETPATH_COMAND)) {
                                     fm.sendPath(question[1], objOut);
                                 }
                             }
@@ -77,28 +88,18 @@ public class ClientHendler {
                                 while (!queue.isEmpty()){
                                     String command = queue.poll();
                                     String[] commands = command.split(" ");
-                                    if (commands[0].startsWith("/delete")){
+                                    if (commands[0].startsWith(DELETE_COMAND)){
                                         fm.deleteFile(new File(commands[1]));
-                                    }/*else if (commands[0].startsWith("/getfile")){
-                                        request = objIn.readObject();
-                                        if (request instanceof FileMessage)
-                                        fm.getFile((FileMessage) request);
-                                    }*/
+                                    }else if (commands[0].startsWith(GETFILE_COMAND)){
+                                        fm.sendFile(commands[1], commands[2], objOut);
+                                    }else if (commands[0].startsWith(CREATEFOLDER_COMAND))
+                                        fm.createFolder(commands[1]);
+                                    else if (commands[0].startsWith(RENAME_COMAND))
+                                        fm.renameFile(commands[1], commands[2]);
                                 }
                             }
                             if (request instanceof FileMessage)
                                 fm.getFile((FileMessage) request);
-                            if (request instanceof File) {
-                                File requestFile = (File) request;
-                                System.out.println("Получен файл " + requestFile.getName());
-                                if (files.contains(requestFile)) {
-                                    files.remove(requestFile);
-                                    System.out.println("Количество объектов после удаления " + files.size());
-                                } else {
-                                    files.add(requestFile);
-                                    System.out.println("Количество объектов после добавления " + files.size());
-                                }
-                            }
                         }
                     }
                 } catch (ClassNotFoundException | IOException |
@@ -118,7 +119,6 @@ public class ClientHendler {
                 }
             }
         });
-        // а стоит ли делать его демоном? мне кажется да т.к. при падении сервера все демоны закроются сами
         tr.setDaemon(true);
         tr.start();
     }
@@ -132,22 +132,22 @@ public class ClientHendler {
         if (!db.checkLoginBusy(questions[1])) {
             if (!db.checkMailBusy(questions[3])) {
                 if (db.registration(questions[1], questions[2], questions[3])) {
-                    sendMsg("/regok");
+                    sendMsg(REGOK);
                 }
             } else {
-                sendMsg("mailBusy");
+                sendMsg(MAIL_BUSY);
             }
         } else {
-            sendMsg("loginBusy");
+            sendMsg(LOGIN_BUSY);
         }
     }
 
     private boolean autorisation(String[] questions) throws SQLException, IOException {
         if (db.authorisation(questions[1], questions[2])) {
-            sendMsg(true);
+            sendMsg(OK_COMMAND +db.getRootFolderName(questions[1], questions[2]));
             return true;
         } else {
-            sendMsg(false);
+            sendMsg(FALSE_COMMAND);
             return false;
         }
     }

@@ -1,5 +1,6 @@
-package server.files;
+package server.model;
 
+import client.model.FileMessage;
 import server.interfaces.fileWorkAbility;
 
 import java.io.File;
@@ -13,26 +14,26 @@ import java.nio.file.StandardOpenOption;
 public class FileManager implements fileWorkAbility {
     private final String rootPath = "../cloud/";
     private File file;
-    private FileMessage fm;
 
     @Override
     public void createFolder(String folderName) {
-        File file = new File(rootPath + folderName + "/");
+        File file = new File(folderName + "/");
         file.mkdirs();
     }
 
     @Override
     public void sendPath(String name, ObjectOutputStream oos) throws IOException {
-        /**name - имя пользователя формирующее путь на сервере rootPath/userName/*/
         file = new File(rootPath + name + "/");
-        File[] file = this.file.listFiles();
-        oos.writeObject(file);
+        File[] files = file.listFiles();
+        oos.writeObject(files);
         oos.flush();
     }
 
     @Override
-    public void renameFile(File file) {
-
+    public void renameFile(String oldName, String newName) {
+        File file = new File(oldName);
+        File newFile = new File(newName);
+        file.renameTo(newFile);
     }
 
     @Override
@@ -44,6 +45,7 @@ public class FileManager implements fileWorkAbility {
     public void pasteFile(File file) {
 
     }
+
     @Override
     public void deleteFile(File file) {
         if (!file.exists())
@@ -58,21 +60,15 @@ public class FileManager implements fileWorkAbility {
     }
 
     @Override
-    public void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException {
-        fm = new FileMessage(path, fileName, Files.readAllBytes(Paths.get(fileName)));
-        System.out.println("отправлен файл по имени " + fm.getName() + " по пути " + fm.getPath());
+    public void sendFile(String serverFilePath, String clientFilePath, ObjectOutputStream oos) throws IOException {
+        FileMessage fm = new FileMessage(serverFilePath, clientFilePath, Files.readAllBytes(Paths.get(serverFilePath)));
         oos.writeObject(fm);
         oos.flush();
     }
 
     @Override
     public void getFile(FileMessage fm) throws IOException {
-        System.out.println("получен файл по имени " + fm.getName() + " сохранен " + fm.getPath());
         Files.write(Paths.get(fm.getPath()), fm.getData(), StandardOpenOption.CREATE);
-    }
-
-    public void refreshPath(File file) {
-
 
     }
 }

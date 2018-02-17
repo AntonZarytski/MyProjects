@@ -1,4 +1,4 @@
-package client.files;
+package client.model;
 
 
 import client.Interfaces.fileWorkAbility;
@@ -16,14 +16,11 @@ import java.util.List;
 
 
 public class FileManager implements fileWorkAbility {
-    private final String rootPath = "../cloud/";
-    private File file = new File(rootPath);
-    private FileMessage fm;
-    private List<File> files;
+    private final String ROOTPATH = "../cloud/";
+    private File file = new File(ROOTPATH);
     private List<Path> paths;
 
     public FileManager() {
-        this.files = new ArrayList<>();
         this.paths = new ArrayList<>();
     }
 
@@ -33,9 +30,10 @@ public class FileManager implements fileWorkAbility {
     }
 
     @Override
-    public void renameFile(File file) {
+    public void renameFile(String oldName, String newName) {
 
     }
+
 
     @Override
     public void copyFile(File file) {
@@ -49,7 +47,6 @@ public class FileManager implements fileWorkAbility {
 
     @Override
     public void deleteFile(File file) {
-        //TODO отпилить
         if (!file.exists())
             return;
         if (file.isDirectory()) {
@@ -64,32 +61,27 @@ public class FileManager implements fileWorkAbility {
 
     @Override
     public void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException {
-        fm = new FileMessage(path, fileName, Files.readAllBytes(Paths.get(fileName)));
-        System.out.println("отправлен файл по имени " + fm.getName() + " по пути " + fm.getPath());
+        FileMessage fm = new FileMessage(path, fileName, Files.readAllBytes(Paths.get(fileName)));
         oos.writeObject(fm);
         oos.flush();
     }
 
     @Override
-    public void getFile(String filePath, ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        fm = (FileMessage) ois.readObject();
-        System.out.println("получен файл по имени " + fm.getName() + " сохранен " + fm.getPath());
-        Files.write(Paths.get(fm.getPath()), fm.getData(), StandardOpenOption.CREATE);
+    public void getFile(String fileSavePath, String fileServerPath, ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        FileMessage fm = (FileMessage) ois.readObject();
+        Files.write(Paths.get(fileSavePath), fm.getData(), StandardOpenOption.CREATE);
     }
 
     public void refreshPath(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         File[] pathes = (File[]) ois.readObject();
         paths.clear();
-        for (int i = 0; i <pathes.length ; i++) {
-            paths.add(pathes[i].toPath());
+        for (File pathe : pathes) {
+            paths.add(pathe.toPath());
         }
-
     }
+
     public List<Path> getPaths() {
         return paths;
     }
 
-    public void refreshFiles() {
-
-    }
 }
