@@ -2,28 +2,32 @@ package client.controllers;
 
 import client.model.FileManager;
 import client.model.Connection;
-import javafx.beans.property.LongProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.MalformedURLException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.List;
 
@@ -46,7 +50,7 @@ public class WorkWindowControll {
     public ListView<Path> mainViewList;
     public Queue<String> commandsList;
     public ContextMenu contextMenu;
-    private List<Path> pathList;
+    public ProgressBar downloadProgress;
     private ObservableList<Path> paths;
     private Connection connection;
     private FileManager fm;
@@ -69,25 +73,77 @@ public class WorkWindowControll {
         connection = Connection.getInstance();
         fm = new FileManager();
         commandsList = new PriorityQueue<>();
-        pathList = fm.getPaths();
-        paths = FXCollections.observableArrayList(pathList);
+        //pathList = fm.getPaths();
+        paths = FXCollections.observableArrayList(fm.getPaths());
         mainViewList.setItems(paths);
         initLoader();
         toAutorise();
         refreshPaths();
         initListeners();
+        initMemoryData();
     }
-    private void initMemoryData(){
-        //LongProperty memory = new LongProperty(paths.stream().mapToLong((s) -> (s.toFile().length())).sum();
-        /*memoryMbLabel;
-        engageMbLabel;
-        freeMbLabel;
-        musicMbLabel;
-        videoMbLabel;
-        docMbLabel;
-        photoMbLabel;
-        otherMbLabel;*/
+
+    private void initMemoryData() throws IOException {
+        String root = "..\\cloud\\" + userId;
+        double MB = Math.pow(1024, 2);
+        long allUseMemorySize = 16000;
+        long engageSize = 0;
+        long freeSize = 0;
+        long videoSize = 0;
+        long musicSize = 0;
+        long docSize = 0;
+        long imageSize = 0;
+        long otherSize = 0;
+        final long[] memorySize = new long[5];
+        Files.walkFileTree(Paths.get(root), new FileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (file.toString().endsWith(".mp4") || file.toString().endsWith(".avi") || file.toString().endsWith(".mkv") || file.toString().endsWith(".wmv")) {
+                    memorySize[0] += file.toFile().length();
+                } else if (file.toString().endsWith(".mp3") || file.toString().endsWith(".flac") || file.toString().endsWith(".wma")) {
+                    memorySize[1] += file.toFile().length();
+                } else if (file.toString().endsWith(".html") || file.toString().endsWith(".txt") || file.toString().endsWith(".docx") || file.toString().endsWith(".xlm") || file.toString().endsWith(".ppt") || file.toString().endsWith(".pdf")) {
+                    memorySize[2] += file.toFile().length();
+                } else if (file.toString().endsWith(".jpg") || file.toString().endsWith(".psd") || file.toString().endsWith(".png") || file.toString().endsWith(".bmp")) {
+                    memorySize[3] += file.toFile().length();
+                } else {
+                    memorySize[4] += file.toFile().length();
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        engageSize = (long) (Arrays.stream(memorySize).sum() / MB);
+        freeSize = allUseMemorySize - engageSize;
+        videoSize = (long) (memorySize[0] / MB);
+        musicSize = (long) (memorySize[1] / MB);
+        docSize = (long) (memorySize[2] / MB);
+        imageSize = (long) (memorySize[3] / MB);
+        otherSize = (long) (memorySize[4] / MB);
+        memoryMbLabel.setText(String.valueOf(allUseMemorySize));
+        engageMbLabel.setText(String.valueOf(engageSize));
+        freeMbLabel.setText(String.valueOf(freeSize));
+        musicMbLabel.setText(String.valueOf(musicSize));
+        videoMbLabel.setText(String.valueOf(videoSize));
+        docMbLabel.setText(String.valueOf(docSize));
+        photoMbLabel.setText(String.valueOf(imageSize));
+        otherMbLabel.setText(String.valueOf(otherSize));
     }
+
     private void initListeners() {
         mainViewList.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -126,6 +182,7 @@ public class WorkWindowControll {
                         System.out.println(downloadingFileName);
                         fm.sendFile(root.toString() + "/" + downloadingFileName, downloadingFile.toString(), Connection.getObjOut());
                         success = true;
+                        refreshFiles(root.toFile());
                     }
                     event.setDropCompleted(success);
                     event.consume();
@@ -134,6 +191,69 @@ public class WorkWindowControll {
                 }
             }
         });
+        mainViewList.setCellFactory(new Callback<ListView<Path>, ListCell<Path>>() {
+            @Override
+            public ListCell<Path> call(ListView<Path> param) {
+                return new ListCell<Path>() {
+                    @Override
+                    protected void updateItem(Path item, boolean empty) {
+                        super.updateItem(item, empty);
+//                        try {
+                            if (!empty) {
+//                                File file;
+//                                Image image;
+                                Rectangle rect = new Rectangle(1,1,6,6);
+                                if (item.toFile().isFile()) {
+                                    if (item.toString().endsWith(".mp4") || item.toString().endsWith(".avi") || item.toString().endsWith(".mkv") || item.toString().endsWith(".wmv")) {
+//                                        file = new File("C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\video.png");
+//                                        image = new Image(file.toURI().toURL().toString());
+                                            rect.setFill(Color.BLUE);
+                                        setGraphic(rect);
+                                    } else if (item.toString().endsWith(".mp3") || item.toString().endsWith(".flac") || item.toString().endsWith(".wma")) {
+//                                        file = new File("C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\music.png");
+//                                        image = new Image(file.toURI().toURL().toString());
+                                            rect.setFill(Color.GREEN);
+                                        setGraphic(rect);
+                                    } else if (item.toString().endsWith(".txt") || item.toString().endsWith(".html") || item.toString().endsWith(".docx") || item.toString().endsWith(".xlm") || item.toString().endsWith(".ppt") || item.toString().endsWith(".pdf")) {
+//                                        file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\doc.png");
+//                                        image = new Image(file.toURI().toURL().toString());
+                                            rect.setFill(Color.GREY);
+                                        setGraphic(rect);
+                                    } else if (item.toString().endsWith(".jpg") || item.toString().endsWith(".psd") || item.toString().endsWith(".png") || item.toString().endsWith(".bmp")) {
+//                                        file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\image.png");
+//                                        image = new Image(file.toURI().toURL().toString());
+                                            rect.setFill(Color.RED);
+                                        setGraphic(rect);
+                                    } else {
+                                            rect.setFill(Color.BLUEVIOLET);
+                                        setGraphic(rect);
+//                                        file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\file.png");
+//                                        image = new Image(file.toURI().toURL().toString());
+                                    }
+                                } else {
+//                                    file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\folder.png");
+//                                    image = new Image(file.toURI().toURL().toString());
+                                        rect.setFill(Color.GOLD);
+                                    setGraphic(rect);
+                                }
+//                                ImageView imageView = new ImageView(image);
+                                setText(String.format("%5s      %d bytes", item.getFileName(), item.toFile().length()));
+                                setStyle("-fx-foreground: #f00;");
+                            }else {
+                                setText("");
+                                setGraphic(null);
+                            }
+//                        } catch (MalformedURLException e) {
+//                            e.printStackTrace();
+//                        }
+                    }
+                };
+            }
+        });
+    }
+    private void changeScale(ImageView imageView, double scale){
+        imageView.setScaleX(scale);
+        imageView.setScaleY(scale);
     }
 
     public void runContextMenu(ActionEvent actionEvent) {
@@ -175,11 +295,12 @@ public class WorkWindowControll {
 
     private void refreshPaths() throws IOException, ClassNotFoundException {
         connection.getPath();
-        fm.getPaths().clear();
+        fm.setPaths(new ArrayList<Path>());
         fm.refreshPath(Connection.getObjIn());
         paths.clear();
         paths.addAll(fm.getPaths());
         mainViewList.setItems(paths);
+        initMemoryData();
     }
 
     private void refreshFiles(File file) {
@@ -188,13 +309,14 @@ public class WorkWindowControll {
         for (int i = 0; i < files.length; i++) {
             paths.add(files[i].toPath());
         }
+        //mainViewList.setItems(paths);
     }
 
     public void directoryUp(MouseEvent mouseEvent) {
         if (mouseEvent.getClickCount() == 2) {
-            String crutch = "..\\cloud\\" + userId;
+            String rootstr = "..\\cloud\\" + userId;
             if (root == null) {
-                root = Paths.get(crutch);
+                root = Paths.get(rootstr);
             }
             if (!root.getFileName().toString().equals(userId)) {
                 root = root.getParent();
@@ -222,6 +344,7 @@ public class WorkWindowControll {
         if (file != null && !file.toFile().isDirectory()) {
             fm.sendFile(root.toString() + "/" + fileName, file.toString(), Connection.getObjOut());
         }
+        refreshFiles(root.toFile());
     }
 
     private File chooseFile(boolean isSave, String downloadfile) {
@@ -230,20 +353,20 @@ public class WorkWindowControll {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All model", "*.*"),
                 new FileChooser.ExtensionFilter("HTML Documents", "*.html"),
-                new FileChooser.ExtensionFilter("TXT", "*.txt"),
-                new FileChooser.ExtensionFilter("DOCX", "*.docx"),
-                new FileChooser.ExtensionFilter("XLM", "*.xlm"),
-                new FileChooser.ExtensionFilter("PPT", "*.ppr"),
-                new FileChooser.ExtensionFilter("PDF", "*.pdf"),
-                new FileChooser.ExtensionFilter("JPG", "*.jpg"),
-                new FileChooser.ExtensionFilter("PSD", "*.psd"),
-                new FileChooser.ExtensionFilter("PNG", "*.png"),
-                new FileChooser.ExtensionFilter("MP3", "*.mp3"),
-                new FileChooser.ExtensionFilter("FLAC", "*.flac"),
-                new FileChooser.ExtensionFilter("WMV", "*.wmv"),
-                new FileChooser.ExtensionFilter("MP4", "*.mp4"),
-                new FileChooser.ExtensionFilter("AVI", "*.avi"),
-                new FileChooser.ExtensionFilter("MKV", "*.mcv")
+                new FileChooser.ExtensionFilter("TXT Documents", "*.txt"),
+                new FileChooser.ExtensionFilter("DOCX Documents", "*.docx"),
+                new FileChooser.ExtensionFilter("XLM Documents", "*.xlm"),
+                new FileChooser.ExtensionFilter("PPT Documents", "*.ppt"),
+                new FileChooser.ExtensionFilter("PDF Documents", "*.pdf"),
+                new FileChooser.ExtensionFilter("JPG Documents", "*.jpg"),
+                new FileChooser.ExtensionFilter("PSD Documents", "*.psd"),
+                new FileChooser.ExtensionFilter("PNG Documents", "*.png"),
+                new FileChooser.ExtensionFilter("MP3 Documents", "*.mp3"),
+                new FileChooser.ExtensionFilter("FLAC Documents", "*.flac"),
+                new FileChooser.ExtensionFilter("WMV Documents", "*.wmv"),
+                new FileChooser.ExtensionFilter("MP4 Documents", "*.mp4"),
+                new FileChooser.ExtensionFilter("AVI Documents", "*.avi"),
+                new FileChooser.ExtensionFilter("MKV Documents", "*.mkv")
         );
         fileChooser.setInitialFileName(downloadfile);
         File file = null;
@@ -264,7 +387,7 @@ public class WorkWindowControll {
             commandsList.add(command);
             connection.sendCommands(commandsList);
             commandsList.clear();
-            fm.getFile(clientFilePath.toString(), serverFilePath.toString(), Connection.getObjIn());
+            fm.getFile(clientFilePath.toString(), serverFilePath.toString(), Connection.getObjIn(), downloadProgress);
         }
     }
 

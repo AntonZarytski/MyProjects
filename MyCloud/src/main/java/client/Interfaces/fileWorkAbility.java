@@ -1,5 +1,7 @@
 package client.Interfaces;
 
+import javafx.scene.control.ProgressBar;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -18,5 +20,5 @@ public interface fileWorkAbility {
 
     void sendFile(String path, String fileName, ObjectOutputStream oos) throws IOException;
 
-    void getFile(String fileSavePath, String fileServerPath, ObjectInputStream ois) throws IOException, ClassNotFoundException;
+    void getFile(String fileSavePath, String fileServerPath, ObjectInputStream ois, ProgressBar bar) throws IOException, ClassNotFoundException;
 }

@@ -44,7 +44,7 @@ public class Connection implements Communicable {
             objIn = new ObjectInputStream(in);
             objOut = new ObjectOutputStream(out);
 
-      /*      Thread tr = new Thread(new Runnable() {
+            Thread tr = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (true){
@@ -53,7 +53,7 @@ public class Connection implements Communicable {
                 }
             });
             tr.setDaemon(true);
-            tr.start();*/
+            tr.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
