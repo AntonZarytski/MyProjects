@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -25,6 +26,7 @@ import javafx.util.Callback;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -51,6 +53,16 @@ public class WorkWindowControll {
     public Queue<String> commandsList;
     public ContextMenu contextMenu;
     public ProgressBar downloadProgress;
+    public ImageView bacakIV;
+    public ImageView refreshIV;
+    public ImageView downloadIV;
+    public ImageView uploadIV;
+    public ImageView newFolderIV;
+    public ImageView deleteIV;
+    public ImageView copyIV;
+    public ImageView cutIV;
+    public ImageView renameIV;
+    public ImageView pasteIV;
     private ObservableList<Path> paths;
     private Connection connection;
     private FileManager fm;
@@ -81,6 +93,17 @@ public class WorkWindowControll {
         refreshPaths();
         initListeners();
         initMemoryData();
+        bacakIV.setImage(new Image(new File("file:../../../resources/back.png").toURI().toString()));
+        refreshIV.setImage(new Image("file:../../../resources/refresh.png"));
+        downloadIV.setImage(new Image("file:../../../resources/download.png"));
+        uploadIV.setImage(new Image( "file:../../../resources/upload.png"));
+        newFolderIV.setImage(new Image("file:../../../resources/newFolder.png"));
+        deleteIV.setImage(new Image("file:../../../resources/delete.png"));
+        copyIV.setImage(new Image("file:../../../resources/copy.png"));
+        cutIV.setImage(new Image("file:../../../resources/cut.png"));
+        renameIV.setImage(new Image("file:../../../resources/rename.png"));
+        pasteIV.setImage(new Image("file:../../../resources/paste.png"));
+
     }
 
     private void initMemoryData() throws IOException {
@@ -199,50 +222,50 @@ public class WorkWindowControll {
                     protected void updateItem(Path item, boolean empty) {
                         super.updateItem(item, empty);
 //                        try {
-                            if (!empty) {
+                        if (!empty) {
 //                                File file;
 //                                Image image;
-                                Rectangle rect = new Rectangle(1,1,6,6);
-                                if (item.toFile().isFile()) {
-                                    if (item.toString().endsWith(".mp4") || item.toString().endsWith(".avi") || item.toString().endsWith(".mkv") || item.toString().endsWith(".wmv")) {
+                            Rectangle rect = new Rectangle(1, 1, 6, 6);
+                            if (item.toFile().isFile()) {
+                                if (item.toString().endsWith(".mp4") || item.toString().endsWith(".avi") || item.toString().endsWith(".mkv") || item.toString().endsWith(".wmv")) {
 //                                        file = new File("C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\video.png");
 //                                        image = new Image(file.toURI().toURL().toString());
-                                            rect.setFill(Color.BLUE);
-                                        setGraphic(rect);
-                                    } else if (item.toString().endsWith(".mp3") || item.toString().endsWith(".flac") || item.toString().endsWith(".wma")) {
+                                    rect.setFill(Color.BLUE);
+                                    setGraphic(rect);
+                                } else if (item.toString().endsWith(".mp3") || item.toString().endsWith(".flac") || item.toString().endsWith(".wma")) {
 //                                        file = new File("C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\music.png");
 //                                        image = new Image(file.toURI().toURL().toString());
-                                            rect.setFill(Color.GREEN);
-                                        setGraphic(rect);
-                                    } else if (item.toString().endsWith(".txt") || item.toString().endsWith(".html") || item.toString().endsWith(".docx") || item.toString().endsWith(".xlm") || item.toString().endsWith(".ppt") || item.toString().endsWith(".pdf")) {
+                                    rect.setFill(Color.GREEN);
+                                    setGraphic(rect);
+                                } else if (item.toString().endsWith(".txt") || item.toString().endsWith(".html") || item.toString().endsWith(".docx") || item.toString().endsWith(".xlm") || item.toString().endsWith(".ppt") || item.toString().endsWith(".pdf")) {
 //                                        file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\doc.png");
 //                                        image = new Image(file.toURI().toURL().toString());
-                                            rect.setFill(Color.GREY);
-                                        setGraphic(rect);
-                                    } else if (item.toString().endsWith(".jpg") || item.toString().endsWith(".psd") || item.toString().endsWith(".png") || item.toString().endsWith(".bmp")) {
+                                    rect.setFill(Color.GREY);
+                                    setGraphic(rect);
+                                } else if (item.toString().endsWith(".jpg") || item.toString().endsWith(".psd") || item.toString().endsWith(".png") || item.toString().endsWith(".bmp")) {
 //                                        file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\image.png");
 //                                        image = new Image(file.toURI().toURL().toString());
-                                            rect.setFill(Color.RED);
-                                        setGraphic(rect);
-                                    } else {
-                                            rect.setFill(Color.BLUEVIOLET);
-                                        setGraphic(rect);
+                                    rect.setFill(Color.RED);
+                                    setGraphic(rect);
+                                } else {
+                                    rect.setFill(Color.BLUEVIOLET);
+                                    setGraphic(rect);
 //                                        file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\file.png");
 //                                        image = new Image(file.toURI().toURL().toString());
-                                    }
-                                } else {
+                                }
+                            } else {
 //                                    file = new File("file:.C:\\Users\\Anton&&Natasha\\Documents\\MyProjects\\MyCloud\\src\\main\\resources\\folder.png");
 //                                    image = new Image(file.toURI().toURL().toString());
-                                        rect.setFill(Color.GOLD);
-                                    setGraphic(rect);
-                                }
-//                                ImageView imageView = new ImageView(image);
-                                setText(String.format("%5s      %d bytes", item.getFileName(), item.toFile().length()));
-                                setStyle("-fx-foreground: #f00;");
-                            }else {
-                                setText("");
-                                setGraphic(null);
+                                rect.setFill(Color.GOLD);
+                                setGraphic(rect);
                             }
+//                                ImageView imageView = new ImageView(image);
+                            setText(String.format("%5s      %d bytes", item.getFileName(), item.toFile().length()));
+                            setStyle("-fx-foreground: #f00;");
+                        } else {
+                            setText("");
+                            setGraphic(null);
+                        }
 //                        } catch (MalformedURLException e) {
 //                            e.printStackTrace();
 //                        }
@@ -251,7 +274,8 @@ public class WorkWindowControll {
             }
         });
     }
-    private void changeScale(ImageView imageView, double scale){
+
+    private void changeScale(ImageView imageView, double scale) {
         imageView.setScaleX(scale);
         imageView.setScaleY(scale);
     }
@@ -436,6 +460,10 @@ public class WorkWindowControll {
         File file = new File(path + "\\" + editWindow.getEditableData());
         paths.add(file.toPath());
         refreshPaths();
+        refreshFiles(root.toFile());
+    }
+
+    public void refreshViewList(ActionEvent actionEvent) {
         refreshFiles(root.toFile());
     }
 }

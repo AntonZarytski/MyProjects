@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
@@ -8,6 +9,8 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -22,23 +25,108 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <ListView fx:id="mainViewList" layoutY="39.0" prefHeight="636.0" prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="39.0">
+                        <HBox layoutX="-2.0" prefHeight="24.0" prefWidth="480.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <ImageView fx:id="bacakIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#directoryUp" pickOnBounds="true" preserveRatio="true">
+                               
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <ImageView fx:id="refreshIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#refreshViewList" pickOnBounds="true" smooth="false">
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                                 <image>
+                                    <Image url="@../../../resources/refresh.png" />
+                                 </image>
+                              </ImageView>
+                              <ImageView fx:id="downloadIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#downloadToComp" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../resources/download.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <ImageView fx:id="uploadIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#downloadOnDisk" pickOnBounds="true" preserveRatio="true">
+                               <image>
+                                    <Image url="@../../../resources/upload.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <ImageView fx:id="newFolderIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#createFolder" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../resources/newFolder.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <ImageView fx:id="deleteIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#deleteFile" pickOnBounds="true" preserveRatio="true">
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                                 <image>
+                                    <Image url="@../../../resources/delete.png" />
+                                 </image>
+                              </ImageView>
+                              <ImageView fx:id="copyIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#copyFile" pickOnBounds="true" preserveRatio="true">
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                                 <image>
+                                    <Image url="@../../../resources/copy.png" />
+                                 </image>
+                              </ImageView>
+                              <ImageView fx:id="cutIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#cutFile" pickOnBounds="true" preserveRatio="true">
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                                 <image>
+                                    <Image url="@../../../resources/cut.png" />
+                                 </image>
+                              </ImageView>
+                              <ImageView fx:id="renameIV" fitHeight="26.0" fitWidth="26.0" onMouseClicked="#renameFile" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../resources/rename.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <ImageView fx:id="pasteIV" fitHeight="26.0" fitWidth="26.0" onKeyPressed="#pasteFile" pickOnBounds="true" preserveRatio="true">
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                                 <image>
+                                    <Image url="@../../../resources/paste.png" />
+                                 </image>
+                              </ImageView>
+                              <ProgressBar fx:id="downloadProgress" prefWidth="200.0" progress="0.0">
+                                 <HBox.margin>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                                 </HBox.margin>
+                              </ProgressBar>
+                           </children></HBox>
+                                <ListView fx:id="mainViewList" layoutY="32.0" prefHeight="643.0" prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="32.0">
                            <contextMenu>
                                         <ContextMenu fx:id="contextMenu" onAction="#runContextMenu">
                                             <items>
+                                    <MenuItem mnemonicParsing="false" onAction="#refreshViewList" text="Обновить" />
+                                                <MenuItem mnemonicParsing="false" onAction="#downloadToComp" text="Скачать" />
+                                                <MenuItem mnemonicParsing="false" onAction="#downloadOnDisk" text="Загрузить на диск" />
                                                 <MenuItem mnemonicParsing="false" onAction="#createFolder" text="Создать папку" />
                                                 <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Удалить" />
                                                 <MenuItem mnemonicParsing="false" onAction="#pasteFile" text="Вставить" />
                                                 <MenuItem mnemonicParsing="false" onAction="#cutFile" text="Вырезать" />
                                                 <MenuItem mnemonicParsing="false" onAction="#copyFile" text="Копировать" />
                                                 <MenuItem mnemonicParsing="false" onAction="#renameFile" text="Переименовать" />
-                                                <MenuItem mnemonicParsing="false" onAction="#downloadToComp" text="Скачать" />
-                                                <MenuItem mnemonicParsing="false" onAction="#downloadOnDisk" text="Загрузить на диск" />
                                             </items>
                                         </ContextMenu>
                            </contextMenu></ListView>
-                                <Label layoutY="14.0" onMouseClicked="#directoryUp" prefHeight="27.0" prefWidth="51.0" text=" . . ." AnchorPane.leftAnchor="0.0" />
-                                <ProgressBar fx:id="downloadProgress" managed="false" visible="false" layoutY="-11.0" prefHeight="27.0" prefWidth="480.0" progress="0.0" AnchorPane.bottomAnchor="659.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                             </children>
                         </AnchorPane>
                     </content>
